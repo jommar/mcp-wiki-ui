@@ -1,0 +1,31 @@
+{
+  "name": "wiki-ui",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "server": "node server/index.js",
+    "dev:all": "concurrently \"npm run server\" \"npm run dev\"",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "concurrently": "^9.2.1",
+    "cors": "^2.8.6",
+    "d3": "^7.9.0",
+    "diff": "^9.0.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "highlight.js": "^11.11.1",
+    "marked": "^18.0.1",
+    "mermaid": "^11.14.0",
+    "pg": "^8.20.0",
+    "vue": "^3.5.32",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.5",
+    "vite": "^8.0.4"
+  }
+}
