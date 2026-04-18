@@ -181,12 +181,28 @@ async function loadGraph() {
 
 function buildColorScale(nodeData) {
   const parents = [...new Set(nodeData.map(n => n.parent || 'Root'))].sort();
-  const palette = [
-    '#6366f1', '#8b5cf6', '#a855f7', '#d946ef',
-    '#ec4899', '#f43f5e', '#f97316', '#eab308',
-    '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6',
-    '#7c3aed', '#c026d3', '#059669', '#dc2626',
-    '#2563eb', '#d97706', '#0891b2', '#78716c',
+const palette = [
+    // Bright, saturated colors that pop on dark backgrounds
+    '#ff6b6b', // bright coral
+    '#ffd93d', // bright yellow
+    '#6bcb77', // bright green
+    '#4d96ff', // bright blue
+    '#ff8ff8', // bright pink
+    '#00d2d3', // bright cyan
+    '#ff9f43', // bright orange
+    '#a29bfe', // light purple
+    '#fd79a8', // hot pink
+    '#fab1a0', // peach
+    '#81ecec', // light teal
+    '#dfe6e9', // off-white
+    '#fdcb6e', // golden yellow
+    '#e17055', // burnt orange
+    '#74b9ff', // sky blue
+    '#d63031', // bright red
+    '#00b894', // emerald
+    '#e84393', // magenta
+    '#0984e3', // vivid blue
+    '#b2bec3', // light gray
   ];
   const scale = {};
   parents.forEach((p, i) => {
@@ -397,6 +413,13 @@ function initGraph() {
   // --- Hover interactions: always light up connected edges ---
   nodeGroup.on('mouseover', (event, d) => {
     event.stopPropagation();
+    // When a node is selected, keep its neighbors highlighted but show hovered node's tooltip
+    if (selectedNode.value) {
+      highlightNeighbors(selectedNode.value.id, adjacency);
+      if (tooltipTimeout) clearTimeout(tooltipTimeout);
+      tooltipTimeout = setTimeout(() => showTooltip(event, d), 300);
+      return;
+    }
     highlightNeighbors(d.id, adjacency);
     if (tooltipTimeout) clearTimeout(tooltipTimeout);
     tooltipTimeout = setTimeout(() => showTooltip(event, d), 300);
@@ -407,7 +430,10 @@ function initGraph() {
   });
 
   nodeGroup.on('mouseout', () => {
-    if (focusMode.value) {
+    // If a node is selected, keep its connected neighbors highlighted
+    if (selectedNode.value) {
+      highlightNeighbors(selectedNode.value.id, adjacency);
+    } else if (focusMode.value) {
       // In focus mode: fully reset (dim everything back)
       resetFocusHighlight();
     } else {
@@ -424,6 +450,8 @@ function initGraph() {
     hideTooltip();
     selectedNode.value = d;
     loadBacklinks(d.id);
+    // Keep connected nodes highlighted like hover effect
+    highlightNeighbors(d.id, adjacency);
   });
 
   // --- Simulation ---
@@ -453,6 +481,7 @@ function initGraph() {
   svg.on('click', () => {
     selectedNode.value = null;
     backlinks.value = [];
+    resetHoverHighlight();
   });
 
   // Store references for layout transitions
