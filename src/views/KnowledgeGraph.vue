@@ -501,14 +501,35 @@ function initGraph() {
 }
 
 // --- Focus Mode ---
+function getNodeOpacity(d, isHighlighted = false) {
+  const parent = d.parent || 'Root';
+  const hasParentFilter = selectedParents.value.size > 0;
+  const text = filterText.value.toLowerCase();
+  const matchesText = !text || (d.title || '').toLowerCase().includes(text) || (d.id || '').toLowerCase().includes(text);
+
+  if (hasParentFilter && !selectedParents.value.has(parent)) return 0.08;
+  if (!matchesText) return 0.15;
+  if (isHighlighted) return 1;
+  return 1;
+}
+
 function highlightNeighbors(nodeId, adjacency) {
   const neighbors = adjacency.get(nodeId) || new Set();
   neighbors.add(nodeId);
 
-  // Dim non-connected nodes (subtle — still visible for context)
+  // Dim non-connected nodes (respecting filters)
   d3.selectAll('.graph-node')
     .transition().duration(200)
-    .attr('opacity', d => neighbors.has(d.id) ? 1 : 0.2);
+    .attr('opacity', d => {
+      const parent = d.parent || 'Root';
+      const hasParentFilter = selectedParents.value.size > 0;
+      const text = filterText.value.toLowerCase();
+      const matchesText = !text || (d.title || '').toLowerCase().includes(text) || (d.id || '').toLowerCase().includes(text);
+
+      if (hasParentFilter && !selectedParents.value.has(parent)) return 0.08;
+      if (!matchesText) return 0.15;
+      return neighbors.has(d.id) ? 1 : 0.2;
+    });
 
   // Light up connected edges
   d3.selectAll('.graph-link')
@@ -516,7 +537,13 @@ function highlightNeighbors(nodeId, adjacency) {
     .attr('stroke-opacity', d => {
       const sid = typeof d.source === 'object' ? d.source.id : d.source;
       const tid = typeof d.target === 'object' ? d.target.id : d.target;
-      return (sid === nodeId || tid === nodeId) ? 0.9 : 0.06;
+      const sourceParent = d.source.parent || 'Root';
+      const targetParent = d.target.parent || 'Root';
+      const hasParentFilter = selectedParents.value.size > 0;
+      const isConnected = sid === nodeId || tid === nodeId;
+
+      if (hasParentFilter && !selectedParents.value.has(sourceParent) && !selectedParents.value.has(targetParent)) return 0.03;
+      return isConnected ? 0.9 : 0.06;
     })
     .attr('stroke', d => {
       const sid = typeof d.source === 'object' ? d.source.id : d.source;
@@ -539,14 +566,31 @@ function highlightNeighbors(nodeId, adjacency) {
   if (focusMode.value) {
     d3.selectAll('.graph-node')
       .transition().duration(200)
-      .attr('opacity', d => neighbors.has(d.id) ? 1 : 0.06);
+      .attr('opacity', d => {
+        const parent = d.parent || 'Root';
+        const hasParentFilter = selectedParents.value.size > 0;
+        const text = filterText.value.toLowerCase();
+        const matchesText = !text || (d.title || '').toLowerCase().includes(text) || (d.id || '').toLowerCase().includes(text);
+
+        if (hasParentFilter && !selectedParents.value.has(parent)) return 0.08;
+        if (!matchesText) return 0.15;
+        return neighbors.has(d.id) ? 1 : 0.06;
+      });
   }
 }
 
 function resetFocusHighlight() {
+  const hasParentFilter = selectedParents.value.size > 0;
+  const text = filterText.value.toLowerCase();
+
   d3.selectAll('.graph-node')
     .transition().duration(300)
-    .attr('opacity', 1);
+    .attr('opacity', d => {
+      const parent = d.parent || 'Root';
+      if (hasParentFilter && !selectedParents.value.has(parent)) return 0.08;
+      if (!text) return 1;
+      return ((d.title || '').toLowerCase().includes(text) || (d.id || '').toLowerCase().includes(text)) ? 1 : 0.15;
+    });
 
   d3.selectAll('.graph-link')
     .transition().duration(300)
@@ -565,16 +609,24 @@ function resetFocusHighlight() {
 
 // Reset hover highlight only (links and nodes back to default)
 function resetHoverHighlight() {
+  const hasParentFilter = selectedParents.value.size > 0;
+  const text = filterText.value.toLowerCase();
+
   d3.selectAll('.graph-link')
     .transition().duration(300)
     .attr('stroke-opacity', 0.25)
     .attr('stroke', 'var(--border)')
     .attr('stroke-width', 1.2);
 
-  // Reset node opacity
+  // Reset node opacity (respecting filters)
   d3.selectAll('.graph-node')
     .transition().duration(300)
-    .attr('opacity', 1);
+    .attr('opacity', d => {
+      const parent = d.parent || 'Root';
+      if (hasParentFilter && !selectedParents.value.has(parent)) return 0.08;
+      if (!text) return 1;
+      return ((d.title || '').toLowerCase().includes(text) || (d.id || '').toLowerCase().includes(text)) ? 1 : 0.15;
+    });
 
   // Reset node glow
   d3.selectAll('.graph-node')
