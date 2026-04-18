@@ -147,6 +147,15 @@ function onWikiChange() {
   z-index: 100;
 }
 
+@media (prefers-color-scheme: dark) {
+  .app-header {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-bottom: 1px solid var(--glass-border);
+  }
+}
+
 .app-header::after {
   content: '';
   position: absolute;
@@ -292,6 +301,15 @@ function onWikiChange() {
   border-bottom: 1px solid var(--border-light);
   font-size: 13px;
   flex-shrink: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .breadcrumb-bar {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-bottom: 1px solid var(--glass-border);
+  }
 }
 
 .breadcrumb-item {
