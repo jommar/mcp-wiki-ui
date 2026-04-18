@@ -324,6 +324,100 @@ function initGraph() {
     parentGroups[p].push(n);
   });
 
+  // Animated concentric circle background (behind everything)
+  const bgGroup = g.insert('g', ':first-child');
+  const centerX = width / 2;
+  const centerY = height / 2;
+  const maxRadius = Math.max(width, height) * 0.6;
+  const circleCount = 8;
+
+// Reusable function to create animated concentric circles
+  function createAnimatedCircles(group, count, maxR, options = {}) {
+    const {
+      baseColor = '#60a5fa',
+      pulseColor = '#f87171',
+      baseOpacity = 0.1,
+      pulseOpacity = 0.2,
+      baseWidth = 1,
+      pulseWidth = 2,
+      duration = 5000,
+      delay = 800,
+      className = 'bg-circle'
+    } = options;
+
+    const bgSubGroup = group.append('g').attr('class', 'bg-circles-layer');
+
+    for (let i = 1; i <= count; i++) {
+      const r = (maxR / count) * i;
+      bgSubGroup.append('circle')
+        .attr('cx', centerX)
+        .attr('cy', centerY)
+        .attr('r', r)
+        .attr('fill', 'none')
+        .attr('stroke', baseColor)
+        .attr('stroke-width', baseWidth)
+        .attr('stroke-opacity', baseOpacity)
+        .attr('class', className)
+        .attr('data-index', i);
+    }
+
+    // Animate circles with breathing pulse
+    function animate() {
+      d3.selectAll('.' + className, bgSubGroup.node())
+        .transition()
+        .duration(duration)
+        .ease(d3.easeSinInOut)
+        .attr('stroke-opacity', pulseOpacity)
+        .attr('stroke', pulseColor)
+        .attr('stroke-width', pulseWidth)
+        .attr('r', (d, i) => {
+          const idx = i + 1;
+          return (maxR / count) * idx * 1.03;
+        })
+        .transition()
+        .duration(duration)
+        .ease(d3.easeSinInOut)
+        .attr('stroke-opacity', baseOpacity)
+        .attr('stroke', baseColor)
+        .attr('stroke-width', baseWidth)
+        .attr('r', (d, i) => {
+          const idx = i + 1;
+          return (maxR / count) * idx;
+        })
+        .on('end', (d, i) => {
+          if (i === count - 1) setTimeout(animate, delay);
+        });
+    }
+    animate();
+    return bgSubGroup;
+  }
+
+  // Layer 1: Blue to red animated circles (8 circles)
+  createAnimatedCircles(bgGroup, circleCount, maxRadius, {
+    baseColor: '#60a5fa',
+    pulseColor: '#f87171',
+    baseOpacity: 0.1,
+    pulseOpacity: 0.2,
+    baseWidth: 1,
+    pulseWidth: 2,
+    duration: 5000,
+    delay: 800,
+    className: 'bg-circle-primary'
+  });
+
+  // Layer 2: More subtle teal layer (16 circles, slower, thinner)
+  createAnimatedCircles(bgGroup, 16, maxRadius * 1.2, {
+    baseColor: '#2dd4bf',
+    pulseColor: '#5eead4',
+    baseOpacity: 0.05,
+    pulseOpacity: 0.1,
+    baseWidth: 0.5,
+    pulseWidth: 1,
+    duration: 7000,
+    delay: 400,
+    className: 'bg-circle-secondary'
+  });
+
   const parentKeys = Object.keys(parentGroups);
   const clusterRadius = Math.min(width, height) * 0.32;
   const clusterCenters = {};
@@ -1412,7 +1506,7 @@ function updateMinimapViewport() {
 
 .graph-container {
   flex: 1;
-  background: transparent;
+  background: radial-gradient(circle at 50% 50%, #18181b 0%, #09090b 100%);
 }
 
 .graph-loading {
