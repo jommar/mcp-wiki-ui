@@ -55,7 +55,12 @@ function renderMarkdownWithAnchors(md) {
       cleanText = anchorMatch[1].trim();
       customAnchor = anchorMatch[2];
     }
-    const id = customAnchor || text.toLowerCase().replace(/[^\w]+/g, '-').replace(/(^-|-$)/g, '');
+    const id =
+      customAnchor ||
+      text
+        .toLowerCase()
+        .replace(/[^\w]+/g, '-')
+        .replace(/(^-|-$)/g, '');
     return `<h${depth} id="${id}"><a href="#${id}" class="heading-anchor">#</a>${cleanText}</h${depth}>`;
   };
 
@@ -68,13 +73,13 @@ function renderMarkdownWithAnchors(md) {
   };
 
   renderer.table = ({ header, rows }) => {
-    const renderCells = cells => cells.map(c => `<td>${c.text ?? ''}</td>`).join('');
-    const thead = `<tr>${header.map(c => `<th>${c.text ?? ''}</th>`).join('')}</tr>`;
-    const tbody = rows.map(row => `<tr>${renderCells(row)}</tr>`).join('');
+    const renderCells = (cells) => cells.map((c) => `<td>${c.text ?? ''}</td>`).join('');
+    const thead = `<tr>${header.map((c) => `<th>${c.text ?? ''}</th>`).join('')}</tr>`;
+    const tbody = rows.map((row) => `<tr>${renderCells(row)}</tr>`).join('');
     return `<div class="table-wrapper"><table><thead>${thead}</thead><tbody>${tbody}</tbody></table></div>`;
   };
 
-  renderer.link = ({ href, title, text }) => {
+  renderer.link = ({ href, title: _title, text }) => {
     if (href && href.startsWith('#')) {
       return `<a href="${href}" class="internal-link">${text}</a>`;
     }
@@ -103,7 +108,9 @@ async function renderMermaidDiagrams(containerEl) {
     try {
       const { svg } = await mermaid.render(renderId, diagramCode);
       placeholder.outerHTML = `<div class="mermaid-diagram">${svg}</div>`;
-      const svgEl = placeholder.parentElement?.querySelector('svg') || containerEl.querySelector(`#${renderId}`);
+      const svgEl =
+        placeholder.parentElement?.querySelector('svg') ||
+        containerEl.querySelector(`#${renderId}`);
       if (svgEl) {
         svgEl.style.maxWidth = '100%';
         svgEl.style.height = 'auto';
@@ -117,9 +124,10 @@ async function renderMermaidDiagrams(containerEl) {
 
 const renderedContent = computed(() => {
   if (!section.value?.content) return '';
-  const md = typeof section.value.content === 'string'
-    ? section.value.content
-    : JSON.stringify(section.value.content);
+  const md =
+    typeof section.value.content === 'string'
+      ? section.value.content
+      : JSON.stringify(section.value.content);
   return renderMarkdownWithAnchors(md);
 });
 
@@ -128,7 +136,9 @@ const diffHtml = computed(() => {
   const entry = history.value[diffIndex.value];
   if (!entry) return null;
   return {
-    before: entry.contentBefore ? renderMarkdownWithAnchors(entry.contentBefore) : '<em>No previous content</em>',
+    before: entry.contentBefore
+      ? renderMarkdownWithAnchors(entry.contentBefore)
+      : '<em>No previous content</em>',
     after: renderMarkdownWithAnchors(entry.contentAfter),
     reason: entry.changeReason,
     changedAt: entry.changedAt,
@@ -139,9 +149,12 @@ onMounted(async () => {
   await loadSection();
 });
 
-watch(() => props.sectionKey, async () => {
-  await loadSection();
-});
+watch(
+  () => props.sectionKey,
+  async () => {
+    await loadSection();
+  },
+);
 
 watch(activeTab, async () => {
   if (activeTab.value === 'content') {
@@ -156,14 +169,19 @@ async function loadSection() {
     const [sectionData, backlinksData, relatedData] = await Promise.all([
       wikiApi.getSection(props.sectionKey, props.wikiId, contentOffset.value, contentLimit.value),
       wikiApi.getBacklinks(props.sectionKey, props.wikiId).catch(() => ({ backlinks: [] })),
-      wikiApi.getSection(props.sectionKey, props.wikiId).then(r => r.relatedSections || []).catch(() => []),
+      wikiApi
+        .getSection(props.sectionKey, props.wikiId)
+        .then((r) => r.relatedSections || [])
+        .catch(() => []),
     ]);
     section.value = sectionData;
     backlinks.value = backlinksData.backlinks || [];
     related.value = relatedData;
 
     if (props.wikiId) {
-      const historyData = await wikiApi.getHistory(props.sectionKey, props.wikiId, historyLimit.value).catch(() => ({ history: [] }));
+      const historyData = await wikiApi
+        .getHistory(props.sectionKey, props.wikiId, historyLimit.value)
+        .catch(() => ({ history: [] }));
       history.value = historyData.history || [];
     }
   } catch (err) {
@@ -183,7 +201,11 @@ function loadMoreContent() {
 }
 
 function navigateTo(key) {
-  router.push({ name: 'section', params: { sectionKey: key }, query: props.wikiId ? { wikiId: props.wikiId } : {} });
+  router.push({
+    name: 'section',
+    params: { sectionKey: key },
+    query: props.wikiId ? { wikiId: props.wikiId } : {},
+  });
 }
 
 function goBack() {
@@ -197,8 +219,16 @@ function goBack() {
     <span>Loading section...</span>
   </div>
   <div v-else-if="!section" class="error-view">
-    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
-      <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
+    <svg
+      viewBox="0 0 24 24"
+      width="48"
+      height="48"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 8v4M12 16h.01" />
     </svg>
     <p>Section not found</p>
     <button class="back-btn" @click="goBack">Go Back</button>
@@ -207,7 +237,16 @@ function goBack() {
     <div class="viewer-header">
       <div class="header-left">
         <button class="back-btn" @click="goBack">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
           Back
         </button>
         <div class="viewer-title-area">
@@ -232,10 +271,56 @@ function goBack() {
         :class="['tab-btn', { active: activeTab === tab }]"
         @click="activeTab = tab"
       >
-        <svg v-if="tab === 'content'" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-        <svg v-else-if="tab === 'backlinks'" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        <svg v-else-if="tab === 'history'" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        <svg v-else viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <svg
+          v-if="tab === 'content'"
+          viewBox="0 0 24 24"
+          width="14"
+          height="14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <path d="M14 2v6h6" />
+        </svg>
+        <svg
+          v-else-if="tab === 'backlinks'"
+          viewBox="0 0 24 24"
+          width="14"
+          height="14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+        </svg>
+        <svg
+          v-else-if="tab === 'history'"
+          viewBox="0 0 24 24"
+          width="14"
+          height="14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 6v6l4 2" />
+        </svg>
+        <svg
+          v-else
+          viewBox="0 0 24 24"
+          width="14"
+          height="14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="3" />
+          <path
+            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+          />
+        </svg>
         {{ tab.charAt(0).toUpperCase() + tab.slice(1) }}
         <span v-if="tab === 'backlinks'" class="tab-count">({{ backlinks.length }})</span>
         <span v-if="tab === 'history'" class="tab-count">({{ history.length }})</span>
@@ -246,13 +331,32 @@ function goBack() {
       <div v-show="activeTab === 'content'" class="content-tab">
         <div ref="contentContainer" class="markdown-body" v-html="renderedContent" />
         <button v-if="section.hasMore" class="load-more-btn" @click="loadMoreContent">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M12 5v14M5 12h14" />
+          </svg>
           Load more ({{ (section.totalLength - contentOffset).toLocaleString() }} chars remaining)
         </button>
 
         <div v-if="related.length" class="related-section">
           <h4>
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            <svg
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+            </svg>
             Related Sections
           </h4>
           <ul class="related-list">
@@ -265,38 +369,89 @@ function goBack() {
 
       <div v-show="activeTab === 'backlinks'" class="backlinks-tab">
         <h4 class="tab-title">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+          </svg>
           Incoming Links ({{ backlinks.length }})
         </h4>
         <ul v-if="backlinks.length" class="link-list">
           <li v-for="bl in backlinks" :key="bl.key" class="link-card">
             <a href="#" @click.prevent="navigateTo(bl.key)">
               <div class="link-icon">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                <svg
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <path d="M14 2v6h6" />
+                </svg>
               </div>
               <div class="link-info">
                 <span class="link-title">{{ bl.title }}</span>
                 <span class="link-parent">{{ bl.parent }}</span>
               </div>
-              <svg class="link-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+              <svg
+                class="link-arrow"
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M9 18l6-6-6-6" />
+              </svg>
             </a>
           </li>
         </ul>
         <div v-else class="empty-state">
-          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01M15 9h.01"/></svg>
+          <svg
+            viewBox="0 0 24 24"
+            width="32"
+            height="32"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M8 15s1.5 2 4 2 4-2 4-2" />
+            <path d="M9 9h.01M15 9h.01" />
+          </svg>
           <p>No sections link to this one</p>
         </div>
       </div>
 
       <div v-show="activeTab === 'history'" class="history-tab">
         <div v-if="!history.length" class="empty-state">
-          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <svg
+            viewBox="0 0 24 24"
+            width="32"
+            height="32"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 6v6l4 2" />
+          </svg>
           <p>No edit history available</p>
         </div>
         <template v-else>
           <div class="history-controls">
             <label class="toggle-label">
-              <input type="checkbox" v-model="showDiff" />
+              <input v-model="showDiff" type="checkbox" />
               <span class="toggle-track"><span class="toggle-thumb" /></span>
               Show diff view
             </label>
@@ -326,11 +481,31 @@ function goBack() {
               </div>
               <div class="timeline-content">
                 <div class="timeline-header">
-                  <span class="timeline-date">{{ new Date(entry.changedAt).toLocaleString() }}</span>
-                  <span v-if="entry.changeReason" class="timeline-reason">{{ entry.changeReason }}</span>
+                  <span class="timeline-date">{{
+                    new Date(entry.changedAt).toLocaleString()
+                  }}</span>
+                  <span v-if="entry.changeReason" class="timeline-reason">{{
+                    entry.changeReason
+                  }}</span>
                 </div>
-                <button class="diff-toggle" @click="showDiff = true; diffIndex = idx">
-                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <button
+                  class="diff-toggle"
+                  @click="
+                    showDiff = true;
+                    diffIndex = idx;
+                  "
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="12"
+                    height="12"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
                   View Diff
                 </button>
               </div>
@@ -342,13 +517,27 @@ function goBack() {
       <div v-show="activeTab === 'metadata'" class="metadata-tab">
         <div class="metadata-card">
           <h4>
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <svg
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+              />
+            </svg>
             Technical Metadata
           </h4>
           <dl class="metadata-list">
             <div class="meta-row">
               <dt>Key</dt>
-              <dd><code class="meta-code">{{ section.key }}</code></dd>
+              <dd>
+                <code class="meta-code">{{ section.key }}</code>
+              </dd>
             </div>
             <div class="meta-row">
               <dt>Title</dt>
@@ -356,7 +545,9 @@ function goBack() {
             </div>
             <div class="meta-row">
               <dt>Wiki ID</dt>
-              <dd><span class="meta-tag wiki">{{ section.wikiId }}</span></dd>
+              <dd>
+                <span class="meta-tag wiki">{{ section.wikiId }}</span>
+              </dd>
             </div>
             <div class="meta-row">
               <dt>Parent</dt>
@@ -368,13 +559,19 @@ function goBack() {
             </div>
             <div class="meta-row">
               <dt>Source File</dt>
-              <dd><code class="meta-code">{{ section.source || 'N/A' }}</code></dd>
+              <dd>
+                <code class="meta-code">{{ section.source || 'N/A' }}</code>
+              </dd>
             </div>
             <div class="meta-row">
               <dt>Breadcrumbs</dt>
               <dd>
                 <div class="breadcrumb-tags">
-                  <span v-for="(crumb, idx) in section.breadcrumbs" :key="idx" class="breadcrumb-tag">
+                  <span
+                    v-for="(crumb, idx) in section.breadcrumbs"
+                    :key="idx"
+                    class="breadcrumb-tag"
+                  >
                     {{ crumb }}
                   </span>
                   <span v-if="!section.breadcrumbs.length" class="text-muted">None</span>
@@ -383,7 +580,9 @@ function goBack() {
             </div>
             <div class="meta-row">
               <dt>Offset</dt>
-              <dd>{{ contentOffset.toLocaleString() }} / {{ section.totalLength?.toLocaleString() }}</dd>
+              <dd>
+                {{ contentOffset.toLocaleString() }} / {{ section.totalLength?.toLocaleString() }}
+              </dd>
             </div>
             <div class="meta-row">
               <dt>Has More</dt>
@@ -407,7 +606,8 @@ function goBack() {
   height: 100%;
 }
 
-.loading-view, .error-view {
+.loading-view,
+.error-view {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -428,7 +628,9 @@ function goBack() {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .error-view svg {
@@ -605,10 +807,22 @@ function goBack() {
   line-height: 1.3;
 }
 
-.content-tab :deep(.markdown-body h1) { font-size: 24px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-.content-tab :deep(.markdown-body h2) { font-size: 20px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
-.content-tab :deep(.markdown-body h3) { font-size: 17px; }
-.content-tab :deep(.markdown-body h4) { font-size: 15px; }
+.content-tab :deep(.markdown-body h1) {
+  font-size: 24px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+.content-tab :deep(.markdown-body h2) {
+  font-size: 20px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+}
+.content-tab :deep(.markdown-body h3) {
+  font-size: 17px;
+}
+.content-tab :deep(.markdown-body h4) {
+  font-size: 15px;
+}
 
 .content-tab :deep(.markdown-body h1:first-child),
 .content-tab :deep(.markdown-body h2:first-child),
@@ -646,7 +860,7 @@ function goBack() {
   margin-bottom: 4px;
 }
 
-.content-tab :deep(.markdown-body li > input[type="checkbox"]) {
+.content-tab :deep(.markdown-body li > input[type='checkbox']) {
   margin-right: 6px;
 }
 

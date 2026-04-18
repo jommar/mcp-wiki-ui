@@ -17,11 +17,15 @@ export const wikiApi = {
   getInfo: (wikiId) => fetchApi('/wiki/info', { wikiId }),
   getSections: (wikiId, limit = 500) => fetchApi('/wiki/sections', { wikiId, limit }),
   browse: (topic, wikiId, limit = 200) => fetchApi('/wiki/browse', { topic, wikiId, limit }),
-  search: (query, wikiId, fuzzy = false, limit = 20) => fetchApi('/wiki/search', { query, wikiId, fuzzy, limit }),
-  getSection: (key, wikiId, offset = 0, limit = 8000) => fetchApi(`/wiki/section/${encodeURIComponent(key)}`, { wikiId, offset, limit }),
-  getSectionsBatch: (keys, wikiId) => fetchApi('/wiki/sections/batch', { keys: keys.join(','), wikiId }),
+  search: (query, wikiId, fuzzy = false, limit = 20) =>
+    fetchApi('/wiki/search', { query, wikiId, fuzzy, limit }),
+  getSection: (key, wikiId, offset = 0, limit = 8000) =>
+    fetchApi(`/wiki/section/${encodeURIComponent(key)}`, { wikiId, offset, limit }),
+  getSectionsBatch: (keys, wikiId) =>
+    fetchApi('/wiki/sections/batch', { keys: keys.join(','), wikiId }),
   getBacklinks: (key, wikiId) => fetchApi(`/wiki/backlinks/${encodeURIComponent(key)}`, { wikiId }),
   validate: (wikiId) => fetchApi('/wiki/validate', { wikiId }),
-  getHistory: (key, wikiId, limit = 10) => fetchApi(`/wiki/history/${encodeURIComponent(key)}`, { wikiId, limit }),
+  getHistory: (key, wikiId, limit = 10) =>
+    fetchApi(`/wiki/history/${encodeURIComponent(key)}`, { wikiId, limit }),
   getGraph: (wikiId) => fetchApi('/wiki/graph', { wikiId }),
 };

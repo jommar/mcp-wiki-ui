@@ -6,7 +6,7 @@ import { wikiApi } from '../api/wiki.js';
 
 const props = defineProps({ wikiId: String });
 const router = useRouter();
-const route = useRoute();
+const _route = useRoute();
 
 const graphContainer = ref(null);
 const selectedNode = ref(null);
@@ -30,7 +30,7 @@ let tooltipTimeout = null;
 
 // Focus mode state
 const focusMode = ref(false);
-const focusedNodeId = ref(null);
+const _focusedNodeId = ref(null);
 
 // Health data
 const healthIssues = ref({ empty: new Set(), orphaned: new Set() });
@@ -65,12 +65,15 @@ onUnmounted(() => {
   document.removeEventListener('keydown', handleGlobalKeydown);
 });
 
-watch(() => props.wikiId, async () => {
-  await loadGraph();
-  await loadHealth();
-  initGraph();
-  initMinimap();
-});
+watch(
+  () => props.wikiId,
+  async () => {
+    await loadGraph();
+    await loadHealth();
+    initGraph();
+    initMinimap();
+  },
+);
 
 watch(filterText, () => {
   applyFilters();
@@ -112,8 +115,8 @@ async function loadHealth() {
   try {
     const data = await wikiApi.validate(props.wikiId || undefined);
     healthIssues.value = {
-      empty: new Set((data.emptySections || []).map(s => s.key)),
-      orphaned: new Set((data.orphanedSections || []).map(s => s.key)),
+      empty: new Set((data.emptySections || []).map((s) => s.key)),
+      orphaned: new Set((data.orphanedSections || []).map((s) => s.key)),
     };
   } catch {
     healthIssues.value = { empty: new Set(), orphaned: new Set() };
@@ -125,25 +128,39 @@ function applyFilters() {
   const text = filterText.value.toLowerCase();
   const hasParentFilter = selectedParents.value.size > 0;
 
-  d3.selectAll('.graph-node')
-    .attr('opacity', d => {
-      const parent = d.parent || 'Root';
-      if (hasParentFilter && !selectedParents.value.has(parent)) return 0.08;
-      if (!text) return 1;
-      return ((d.title || '').toLowerCase().includes(text) || (d.id || '').toLowerCase().includes(text)) ? 1 : 0.15;
-    });
-  d3.selectAll('.graph-link')
-    .attr('opacity', d => {
-      const sourceParent = d.source.parent || 'Root';
-      const targetParent = d.target.parent || 'Root';
-      if (hasParentFilter && !selectedParents.value.has(sourceParent) && !selectedParents.value.has(targetParent)) return 0.03;
-      if (!text) return 0.4;
-      const sourceTitle = (d.source.title || '').toLowerCase();
-      const sourceId = (typeof d.source === 'object' ? (d.source.id || '') : String(d.source)).toLowerCase();
-      const targetTitle = (d.target.title || '').toLowerCase();
-      const targetId = (typeof d.target === 'object' ? (d.target.id || '') : String(d.target)).toLowerCase();
-      return (sourceTitle.includes(text) || sourceId.includes(text) || targetTitle.includes(text) || targetId.includes(text)) ? 0.6 : 0.05;
-    });
+  d3.selectAll('.graph-node').attr('opacity', (d) => {
+    const parent = d.parent || 'Root';
+    if (hasParentFilter && !selectedParents.value.has(parent)) return 0.08;
+    if (!text) return 1;
+    return (d.title || '').toLowerCase().includes(text) || (d.id || '').toLowerCase().includes(text)
+      ? 1
+      : 0.15;
+  });
+  d3.selectAll('.graph-link').attr('opacity', (d) => {
+    const sourceParent = d.source.parent || 'Root';
+    const targetParent = d.target.parent || 'Root';
+    if (
+      hasParentFilter &&
+      !selectedParents.value.has(sourceParent) &&
+      !selectedParents.value.has(targetParent)
+    )
+      return 0.03;
+    if (!text) return 0.4;
+    const sourceTitle = (d.source.title || '').toLowerCase();
+    const sourceId = (
+      typeof d.source === 'object' ? d.source.id || '' : String(d.source)
+    ).toLowerCase();
+    const targetTitle = (d.target.title || '').toLowerCase();
+    const targetId = (
+      typeof d.target === 'object' ? d.target.id || '' : String(d.target)
+    ).toLowerCase();
+    return sourceTitle.includes(text) ||
+      sourceId.includes(text) ||
+      targetTitle.includes(text) ||
+      targetId.includes(text)
+      ? 0.6
+      : 0.05;
+  });
 }
 
 function toggleParentFilter(parent) {
@@ -168,9 +185,10 @@ async function loadGraph() {
   loading.value = true;
   try {
     const data = await wikiApi.getGraph(props.wikiId || undefined);
-    nodes.value = data.nodes.filter(n => (n.contentLength || 0) > 0);
-    edges.value = data.edges.filter(e =>
-      nodes.value.some(n => n.id === e.source) && nodes.value.some(n => n.id === e.target),
+    nodes.value = data.nodes.filter((n) => (n.contentLength || 0) > 0);
+    edges.value = data.edges.filter(
+      (e) =>
+        nodes.value.some((n) => n.id === e.source) && nodes.value.some((n) => n.id === e.target),
     );
   } catch (err) {
     console.error('Failed to load graph:', err);
@@ -180,8 +198,8 @@ async function loadGraph() {
 }
 
 function buildColorScale(nodeData) {
-  const parents = [...new Set(nodeData.map(n => n.parent || 'Root'))].sort();
-const palette = [
+  const parents = [...new Set(nodeData.map((n) => n.parent || 'Root'))].sort();
+  const palette = [
     // Bright, saturated colors that pop on dark backgrounds
     '#ff6b6b', // bright coral
     '#ffd93d', // bright yellow
@@ -209,14 +227,17 @@ const palette = [
     scale[p] = palette[i % palette.length];
   });
   parentColors.value = scale;
-  return d3.scaleOrdinal().domain(parents).range(parents.map(p => scale[p]));
+  return d3
+    .scaleOrdinal()
+    .domain(parents)
+    .range(parents.map((p) => scale[p]));
 }
 
 // Compute centrality (link count) for each node
 function computeCentrality(nodeData, linkData) {
   const counts = new Map();
-  nodeData.forEach(n => counts.set(n.id, 0));
-  linkData.forEach(l => {
+  nodeData.forEach((n) => counts.set(n.id, 0));
+  linkData.forEach((l) => {
     const sid = typeof l.source === 'object' ? l.source.id : l.source;
     const tid = typeof l.target === 'object' ? l.target.id : l.target;
     counts.set(sid, (counts.get(sid) || 0) + 1);
@@ -233,7 +254,8 @@ function initGraph() {
   const width = container.clientWidth;
   const height = container.clientHeight;
 
-  svg = d3.select(container)
+  svg = d3
+    .select(container)
     .append('svg')
     .attr('width', width)
     .attr('height', height)
@@ -258,24 +280,40 @@ function initGraph() {
 
   // Radial gradients for each parent color (created dynamically)
   const colorScale = buildColorScale(nodes.value);
-  const parents = [...new Set(nodes.value.map(n => n.parent || 'Root'))];
-  parents.forEach(p => {
+  const parents = [...new Set(nodes.value.map((n) => n.parent || 'Root'))];
+  parents.forEach((p) => {
     const color = colorScale(p);
-    const grad = defs.append('radialGradient')
+    const grad = defs
+      .append('radialGradient')
       .attr('id', `radial-${p.replace(/[^a-zA-Z0-9]/g, '_')}`)
-      .attr('cx', '35%').attr('cy', '35%').attr('r', '65%');
+      .attr('cx', '35%')
+      .attr('cy', '35%')
+      .attr('r', '65%');
     grad.append('stop').attr('offset', '0%').attr('stop-color', d3.color(color).brighter(0.8));
     grad.append('stop').attr('offset', '60%').attr('stop-color', color);
     grad.append('stop').attr('offset', '100%').attr('stop-color', d3.color(color).darker(0.5));
   });
 
   // Health warning pulse gradient
-  const healthGrad = defs.append('radialGradient').attr('id', 'health-warning')
-    .attr('cx', '50%').attr('cy', '50%').attr('r', '50%');
-  healthGrad.append('stop').attr('offset', '0%').attr('stop-color', '#f59e0b').attr('stop-opacity', 0.8);
-  healthGrad.append('stop').attr('offset', '100%').attr('stop-color', '#ef4444').attr('stop-opacity', 0.2);
+  const healthGrad = defs
+    .append('radialGradient')
+    .attr('id', 'health-warning')
+    .attr('cx', '50%')
+    .attr('cy', '50%')
+    .attr('r', '50%');
+  healthGrad
+    .append('stop')
+    .attr('offset', '0%')
+    .attr('stop-color', '#f59e0b')
+    .attr('stop-opacity', 0.8);
+  healthGrad
+    .append('stop')
+    .attr('offset', '100%')
+    .attr('stop-color', '#ef4444')
+    .attr('stop-opacity', 0.2);
 
-  zoom = d3.zoom()
+  zoom = d3
+    .zoom()
     .scaleExtent([0.1, 4])
     .on('zoom', (event) => {
       g.attr('transform', event.transform);
@@ -288,28 +326,30 @@ function initGraph() {
   g = svg.append('g');
 
   const nodeMap = new Map();
-  nodes.value.forEach(n => nodeMap.set(n.id, { ...n }));
+  nodes.value.forEach((n) => nodeMap.set(n.id, { ...n }));
 
   const linkData = edges.value
-    .filter(e => nodeMap.has(e.source) && nodeMap.has(e.target))
-    .map(e => ({ source: e.source, target: e.target }));
+    .filter((e) => nodeMap.has(e.source) && nodeMap.has(e.target))
+    .map((e) => ({ source: e.source, target: e.target }));
 
-  const nodeData = nodes.value.map(n => nodeMap.get(n.id));
+  const nodeData = nodes.value.map((n) => nodeMap.get(n.id));
 
   // Compute centrality
   const centrality = computeCentrality(nodeData, linkData);
-  nodeData.forEach(n => { n.centrality = centrality.get(n.id) || 0; });
+  nodeData.forEach((n) => {
+    n.centrality = centrality.get(n.id) || 0;
+  });
 
   // Node radius based on centrality
-  const maxCentrality = Math.max(...nodeData.map(n => n.centrality), 1);
-  nodeData.forEach(n => {
+  const maxCentrality = Math.max(...nodeData.map((n) => n.centrality), 1);
+  nodeData.forEach((n) => {
     n.radius = 5 + (n.centrality / maxCentrality) * 14; // 5-19px range
   });
 
   // Build adjacency for focus mode
   const adjacency = new Map();
-  nodeData.forEach(n => adjacency.set(n.id, new Set()));
-  linkData.forEach(l => {
+  nodeData.forEach((n) => adjacency.set(n.id, new Set()));
+  linkData.forEach((l) => {
     const sid = typeof l.source === 'object' ? l.source.id : l.source;
     const tid = typeof l.target === 'object' ? l.target.id : l.target;
     adjacency.get(sid).add(tid);
@@ -318,7 +358,7 @@ function initGraph() {
 
   // Cluster centers for grouping
   const parentGroups = {};
-  nodeData.forEach(n => {
+  nodeData.forEach((n) => {
     const p = n.parent || 'Root';
     if (!parentGroups[p]) parentGroups[p] = [];
     parentGroups[p].push(n);
@@ -331,7 +371,7 @@ function initGraph() {
   const maxRadius = Math.max(width, height) * 0.6;
   const circleCount = 8;
 
-// Reusable function to create animated concentric circles
+  // Reusable function to create animated concentric circles
   function createAnimatedCircles(group, count, maxR, options = {}) {
     const {
       baseColor = '#60a5fa',
@@ -342,14 +382,15 @@ function initGraph() {
       pulseWidth = 2,
       duration = 5000,
       delay = 800,
-      className = 'bg-circle'
+      className = 'bg-circle',
     } = options;
 
     const bgSubGroup = group.append('g').attr('class', 'bg-circles-layer');
 
     for (let i = 1; i <= count; i++) {
       const r = (maxR / count) * i;
-      bgSubGroup.append('circle')
+      bgSubGroup
+        .append('circle')
         .attr('cx', centerX)
         .attr('cy', centerY)
         .attr('r', r)
@@ -402,7 +443,7 @@ function initGraph() {
     pulseWidth: 2,
     duration: 5000,
     delay: 800,
-    className: 'bg-circle-primary'
+    className: 'bg-circle-primary',
   });
 
   // Layer 2: More subtle teal layer (16 circles, slower, thinner)
@@ -415,7 +456,7 @@ function initGraph() {
     pulseWidth: 1,
     duration: 7000,
     delay: 400,
-    className: 'bg-circle-secondary'
+    className: 'bg-circle-secondary',
   });
 
   const parentKeys = Object.keys(parentGroups);
@@ -430,7 +471,9 @@ function initGraph() {
   });
 
   // --- LINKS: Curved Bezier paths ---
-  const linkGroup = g.append('g').selectAll('path')
+  const linkGroup = g
+    .append('g')
+    .selectAll('path')
     .data(linkData)
     .join('path')
     .attr('class', 'graph-link')
@@ -440,69 +483,74 @@ function initGraph() {
     .attr('stroke-width', 1.2);
 
   // --- NODES ---
-  const nodeGroup = g.append('g')
+  const nodeGroup = g
+    .append('g')
     .selectAll('g')
     .data(nodeData)
     .join('g')
     .attr('class', 'graph-node')
     .attr('cursor', 'pointer')
-    .call(d3.drag()
-      .on('start', dragStarted)
-      .on('drag', dragged)
-      .on('end', dragEnded));
+    .call(d3.drag().on('start', dragStarted).on('drag', dragged).on('end', dragEnded));
 
   // Outer glow ring (centrality-based)
-  nodeGroup.append('circle')
+  nodeGroup
+    .append('circle')
     .attr('class', 'node-glow')
-    .attr('r', d => d.radius + 5)
+    .attr('r', (d) => d.radius + 5)
     .attr('fill', 'none')
-    .attr('stroke', d => colorScale(d.parent || 'Root'))
-    .attr('stroke-opacity', d => 0.05 + (d.centrality / maxCentrality) * 0.2)
-    .attr('stroke-width', d => 1 + (d.centrality / maxCentrality) * 3);
+    .attr('stroke', (d) => colorScale(d.parent || 'Root'))
+    .attr('stroke-opacity', (d) => 0.05 + (d.centrality / maxCentrality) * 0.2)
+    .attr('stroke-width', (d) => 1 + (d.centrality / maxCentrality) * 3);
 
   // Main node circle with radial gradient
-  nodeGroup.append('circle')
+  nodeGroup
+    .append('circle')
     .attr('class', 'node-main')
-    .attr('r', d => d.radius)
-    .attr('fill', d => {
+    .attr('r', (d) => d.radius)
+    .attr('fill', (d) => {
       const p = d.parent || 'Root';
       return `url(#radial-${p.replace(/[^a-zA-Z0-9]/g, '_')})`;
     })
     .attr('stroke', 'var(--bg)')
     .attr('stroke-width', 1.5)
-    .attr('filter', d => d.centrality > maxCentrality * 0.5 ? 'url(#strong-glow)' : 'url(#glow)');
+    .attr('filter', (d) =>
+      d.centrality > maxCentrality * 0.5 ? 'url(#strong-glow)' : 'url(#glow)',
+    );
 
   // Health warning ring for empty/orphaned nodes
-  nodeGroup.filter(d => healthIssues.value.empty.has(d.id) || healthIssues.value.orphaned.has(d.id))
+  nodeGroup
+    .filter((d) => healthIssues.value.empty.has(d.id) || healthIssues.value.orphaned.has(d.id))
     .append('circle')
     .attr('class', 'health-ring')
-    .attr('r', d => d.radius + 3)
+    .attr('r', (d) => d.radius + 3)
     .attr('fill', 'none')
-    .attr('stroke', d => healthIssues.value.empty.has(d.id) ? '#ef4444' : '#f59e0b')
+    .attr('stroke', (d) => (healthIssues.value.empty.has(d.id) ? '#ef4444' : '#f59e0b'))
     .attr('stroke-width', 2)
     .attr('stroke-dasharray', '3,3')
     .attr('stroke-opacity', 0.8);
 
   // Pulsing dot for health issues
-  nodeGroup.filter(d => healthIssues.value.empty.has(d.id) || healthIssues.value.orphaned.has(d.id))
+  nodeGroup
+    .filter((d) => healthIssues.value.empty.has(d.id) || healthIssues.value.orphaned.has(d.id))
     .append('circle')
     .attr('class', 'health-pulse-dot')
-    .attr('cx', d => d.radius * 0.7)
-    .attr('cy', d => -d.radius * 0.7)
+    .attr('cx', (d) => d.radius * 0.7)
+    .attr('cy', (d) => -d.radius * 0.7)
     .attr('r', 3)
-    .attr('fill', d => healthIssues.value.empty.has(d.id) ? '#ef4444' : '#f59e0b')
+    .attr('fill', (d) => (healthIssues.value.empty.has(d.id) ? '#ef4444' : '#f59e0b'))
     .attr('opacity', 0.8);
 
   // Node labels
-  nodeGroup.append('text')
+  nodeGroup
+    .append('text')
     .attr('class', 'node-label')
-    .attr('dy', d => d.radius + 14)
+    .attr('dy', (d) => d.radius + 14)
     .attr('text-anchor', 'middle')
     .attr('fill', 'var(--text)')
     .attr('font-size', '9px')
     .attr('font-weight', '500')
     .attr('pointer-events', 'none')
-    .text(d => d.title.length > 20 ? d.title.slice(0, 18) + '...' : d.title);
+    .text((d) => (d.title.length > 20 ? d.title.slice(0, 18) + '...' : d.title));
 
   // --- Hover interactions: always light up connected edges ---
   nodeGroup.on('mouseover', (event, d) => {
@@ -549,24 +597,38 @@ function initGraph() {
   });
 
   // --- Simulation ---
-  simulation = d3.forceSimulation(nodeData)
-    .force('link', d3.forceLink(linkData).id(d => d.id).distance(100).strength(0.3))
+  simulation = d3
+    .forceSimulation(nodeData)
+    .force(
+      'link',
+      d3
+        .forceLink(linkData)
+        .id((d) => d.id)
+        .distance(100)
+        .strength(0.3),
+    )
     .force('charge', d3.forceManyBody().strength(-250))
     .force('center', d3.forceCenter(width / 2, height / 2).strength(0.03))
-    .force('collision', d3.forceCollide().radius(d => d.radius + 8))
-    .force('x', d3.forceX(d => clusterCenters[d.parent || 'Root']?.x ?? width / 2).strength(0.12))
-    .force('y', d3.forceY(d => clusterCenters[d.parent || 'Root']?.y ?? height / 2).strength(0.12));
+    .force(
+      'collision',
+      d3.forceCollide().radius((d) => d.radius + 8),
+    )
+    .force('x', d3.forceX((d) => clusterCenters[d.parent || 'Root']?.x ?? width / 2).strength(0.12))
+    .force(
+      'y',
+      d3.forceY((d) => clusterCenters[d.parent || 'Root']?.y ?? height / 2).strength(0.12),
+    );
 
   simulation.on('tick', () => {
     // Curved link paths
-    linkGroup.attr('d', d => {
+    linkGroup.attr('d', (d) => {
       const dx = d.target.x - d.source.x;
       const dy = d.target.y - d.source.y;
       const dr = Math.sqrt(dx * dx + dy * dy) * 1.2;
       return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
     });
 
-    nodeGroup.attr('transform', d => `translate(${d.x},${d.y})`);
+    nodeGroup.attr('transform', (d) => `translate(${d.x},${d.y})`);
 
     // Update minimap
     updateMinimapData(nodeData);
@@ -595,11 +657,14 @@ function initGraph() {
 }
 
 // --- Focus Mode ---
-function getNodeOpacity(d, isHighlighted = false) {
+function _getNodeOpacity(d, isHighlighted = false) {
   const parent = d.parent || 'Root';
   const hasParentFilter = selectedParents.value.size > 0;
   const text = filterText.value.toLowerCase();
-  const matchesText = !text || (d.title || '').toLowerCase().includes(text) || (d.id || '').toLowerCase().includes(text);
+  const matchesText =
+    !text ||
+    (d.title || '').toLowerCase().includes(text) ||
+    (d.id || '').toLowerCase().includes(text);
 
   if (hasParentFilter && !selectedParents.value.has(parent)) return 0.08;
   if (!matchesText) return 0.15;
@@ -613,12 +678,16 @@ function highlightNeighbors(nodeId, adjacency) {
 
   // Dim non-connected nodes (respecting filters)
   d3.selectAll('.graph-node')
-    .transition().duration(200)
-    .attr('opacity', d => {
+    .transition()
+    .duration(200)
+    .attr('opacity', (d) => {
       const parent = d.parent || 'Root';
       const hasParentFilter = selectedParents.value.size > 0;
       const text = filterText.value.toLowerCase();
-      const matchesText = !text || (d.title || '').toLowerCase().includes(text) || (d.id || '').toLowerCase().includes(text);
+      const matchesText =
+        !text ||
+        (d.title || '').toLowerCase().includes(text) ||
+        (d.id || '').toLowerCase().includes(text);
 
       if (hasParentFilter && !selectedParents.value.has(parent)) return 0.08;
       if (!matchesText) return 0.15;
@@ -627,8 +696,9 @@ function highlightNeighbors(nodeId, adjacency) {
 
   // Light up connected edges
   d3.selectAll('.graph-link')
-    .transition().duration(200)
-    .attr('stroke-opacity', d => {
+    .transition()
+    .duration(200)
+    .attr('stroke-opacity', (d) => {
       const sid = typeof d.source === 'object' ? d.source.id : d.source;
       const tid = typeof d.target === 'object' ? d.target.id : d.target;
       const sourceParent = d.source.parent || 'Root';
@@ -636,35 +706,44 @@ function highlightNeighbors(nodeId, adjacency) {
       const hasParentFilter = selectedParents.value.size > 0;
       const isConnected = sid === nodeId || tid === nodeId;
 
-      if (hasParentFilter && !selectedParents.value.has(sourceParent) && !selectedParents.value.has(targetParent)) return 0.03;
+      if (
+        hasParentFilter &&
+        !selectedParents.value.has(sourceParent) &&
+        !selectedParents.value.has(targetParent)
+      )
+        return 0.03;
       return isConnected ? 0.9 : 0.06;
     })
-    .attr('stroke', d => {
+    .attr('stroke', (d) => {
       const sid = typeof d.source === 'object' ? d.source.id : d.source;
       const tid = typeof d.target === 'object' ? d.target.id : d.target;
-      return (sid === nodeId || tid === nodeId) ? '#818cf8' : 'var(--border)';
+      return sid === nodeId || tid === nodeId ? '#818cf8' : 'var(--border)';
     })
-    .attr('stroke-width', d => {
+    .attr('stroke-width', (d) => {
       const sid = typeof d.source === 'object' ? d.source.id : d.source;
       const tid = typeof d.target === 'object' ? d.target.id : d.target;
-      return (sid === nodeId || tid === nodeId) ? 2.5 : 1;
+      return sid === nodeId || tid === nodeId ? 2.5 : 1;
     });
 
   // Highlight the hovered node
   d3.selectAll('.graph-node')
-    .filter(d => d.id === nodeId)
+    .filter((d) => d.id === nodeId)
     .select('.node-main')
     .attr('filter', 'url(#strong-glow)');
 
   // Focus mode: dim unrelated nodes even more aggressively
   if (focusMode.value) {
     d3.selectAll('.graph-node')
-      .transition().duration(200)
-      .attr('opacity', d => {
+      .transition()
+      .duration(200)
+      .attr('opacity', (d) => {
         const parent = d.parent || 'Root';
         const hasParentFilter = selectedParents.value.size > 0;
         const text = filterText.value.toLowerCase();
-        const matchesText = !text || (d.title || '').toLowerCase().includes(text) || (d.id || '').toLowerCase().includes(text);
+        const matchesText =
+          !text ||
+          (d.title || '').toLowerCase().includes(text) ||
+          (d.id || '').toLowerCase().includes(text);
 
         if (hasParentFilter && !selectedParents.value.has(parent)) return 0.08;
         if (!matchesText) return 0.15;
@@ -678,16 +757,21 @@ function resetFocusHighlight() {
   const text = filterText.value.toLowerCase();
 
   d3.selectAll('.graph-node')
-    .transition().duration(300)
-    .attr('opacity', d => {
+    .transition()
+    .duration(300)
+    .attr('opacity', (d) => {
       const parent = d.parent || 'Root';
       if (hasParentFilter && !selectedParents.value.has(parent)) return 0.08;
       if (!text) return 1;
-      return ((d.title || '').toLowerCase().includes(text) || (d.id || '').toLowerCase().includes(text)) ? 1 : 0.15;
+      return (d.title || '').toLowerCase().includes(text) ||
+        (d.id || '').toLowerCase().includes(text)
+        ? 1
+        : 0.15;
     });
 
   d3.selectAll('.graph-link')
-    .transition().duration(300)
+    .transition()
+    .duration(300)
     .attr('stroke-opacity', 0.25)
     .attr('stroke', 'var(--border)')
     .attr('stroke-width', 1.2);
@@ -695,7 +779,7 @@ function resetFocusHighlight() {
   // Reset glow
   d3.selectAll('.graph-node')
     .select('.node-main')
-    .attr('filter', d => {
+    .attr('filter', (d) => {
       const maxC = svg?.__maxCentrality || 1;
       return d.centrality > maxC * 0.5 ? 'url(#strong-glow)' : 'url(#glow)';
     });
@@ -707,25 +791,30 @@ function resetHoverHighlight() {
   const text = filterText.value.toLowerCase();
 
   d3.selectAll('.graph-link')
-    .transition().duration(300)
+    .transition()
+    .duration(300)
     .attr('stroke-opacity', 0.25)
     .attr('stroke', 'var(--border)')
     .attr('stroke-width', 1.2);
 
   // Reset node opacity (respecting filters)
   d3.selectAll('.graph-node')
-    .transition().duration(300)
-    .attr('opacity', d => {
+    .transition()
+    .duration(300)
+    .attr('opacity', (d) => {
       const parent = d.parent || 'Root';
       if (hasParentFilter && !selectedParents.value.has(parent)) return 0.08;
       if (!text) return 1;
-      return ((d.title || '').toLowerCase().includes(text) || (d.id || '').toLowerCase().includes(text)) ? 1 : 0.15;
+      return (d.title || '').toLowerCase().includes(text) ||
+        (d.id || '').toLowerCase().includes(text)
+        ? 1
+        : 0.15;
     });
 
   // Reset node glow
   d3.selectAll('.graph-node')
     .select('.node-main')
-    .attr('filter', d => {
+    .attr('filter', (d) => {
       const maxC = svg?.__maxCentrality || 1;
       return d.centrality > maxC * 0.5 ? 'url(#strong-glow)' : 'url(#glow)';
     });
@@ -760,7 +849,7 @@ function applyLayout() {
 
     // Build tree from parent relationships
     const byParent = {};
-    nodeData.forEach(n => {
+    nodeData.forEach((n) => {
       const p = n.parent || 'Root';
       if (!byParent[p]) byParent[p] = [];
       byParent[p].push(n);
@@ -790,8 +879,8 @@ function applyLayout() {
     });
 
     // Animate nodes to tree positions
-    nodeData.forEach(n => {
-      const target = treeNodes.find(t => t.id === n.id);
+    nodeData.forEach((n) => {
+      const target = treeNodes.find((t) => t.id === n.id);
       if (target) {
         n.fx = target.x;
         n.fy = target.y;
@@ -799,7 +888,14 @@ function applyLayout() {
     });
 
     simulation
-      .force('link', d3.forceLink(linkData).id(d => d.id).distance(60).strength(0.8))
+      .force(
+        'link',
+        d3
+          .forceLink(linkData)
+          .id((d) => d.id)
+          .distance(60)
+          .strength(0.8),
+      )
       .force('charge', d3.forceManyBody().strength(-100))
       .force('center', null)
       .force('x', null)
@@ -809,20 +905,38 @@ function applyLayout() {
 
     // After settling, fix positions
     setTimeout(() => {
-      nodeData.forEach(n => { n.fx = n.x; n.fy = n.y; });
+      nodeData.forEach((n) => {
+        n.fx = n.x;
+        n.fy = n.y;
+      });
       simulation.alpha(0).stop();
     }, 1500);
-
   } else {
     // Back to force-directed
-    nodeData.forEach(n => { n.fx = null; n.fy = null; });
+    nodeData.forEach((n) => {
+      n.fx = null;
+      n.fy = null;
+    });
 
     simulation
-      .force('link', d3.forceLink(linkData).id(d => d.id).distance(100).strength(0.3))
+      .force(
+        'link',
+        d3
+          .forceLink(linkData)
+          .id((d) => d.id)
+          .distance(100)
+          .strength(0.3),
+      )
       .force('charge', d3.forceManyBody().strength(-250))
       .force('center', d3.forceCenter(width / 2, height / 2).strength(0.03))
-      .force('x', d3.forceX(d => clusterCenters[d.parent || 'Root']?.x ?? width / 2).strength(0.12))
-      .force('y', d3.forceY(d => clusterCenters[d.parent || 'Root']?.y ?? height / 2).strength(0.12))
+      .force(
+        'x',
+        d3.forceX((d) => clusterCenters[d.parent || 'Root']?.x ?? width / 2).strength(0.12),
+      )
+      .force(
+        'y',
+        d3.forceY((d) => clusterCenters[d.parent || 'Root']?.y ?? height / 2).strength(0.12),
+      )
       .alpha(0.8)
       .restart();
   }
@@ -897,7 +1011,11 @@ function resetZoom() {
 }
 
 function navigateToSection(key) {
-  router.push({ name: 'section', params: { sectionKey: key }, query: props.wikiId ? { wikiId: props.wikiId } : {} });
+  router.push({
+    name: 'section',
+    params: { sectionKey: key },
+    query: props.wikiId ? { wikiId: props.wikiId } : {},
+  });
 }
 
 // --- Command Palette ---
@@ -921,42 +1039,55 @@ async function searchCommandPalette() {
 // --- Mini-map ---
 let minimapBounds = { xMin: 0, yMin: 0, xMax: 1, yMax: 1, scale: 1 };
 let minimapInitialized = false;
-let minimapDragging = false;
+let _minimapDragging = false;
 
 function initMinimap() {
   const minimapEl = document.getElementById('minimap-container');
   if (!minimapEl) return;
   minimapEl.innerHTML = '';
 
-  const mw = 180, mh = 120;
-  minimapSvg = d3.select(minimapEl).append('svg')
-    .attr('width', mw).attr('height', mh)
+  const mw = 180,
+    mh = 120;
+  minimapSvg = d3
+    .select(minimapEl)
+    .append('svg')
+    .attr('width', mw)
+    .attr('height', mh)
     .style('background', 'transparent')
     .style('cursor', 'grab');
 
   minimapG = minimapSvg.append('g');
 
   // Viewport indicator (draggable)
-  minimapG.append('rect')
+  minimapG
+    .append('rect')
     .attr('class', 'minimap-viewport')
     .attr('fill', 'rgba(129, 140, 248, 0.12)')
     .attr('stroke', '#818cf8')
     .attr('stroke-width', 1.5)
     .attr('rx', 2)
-    .attr('x', 0).attr('y', 0).attr('width', mw).attr('height', mh)
+    .attr('x', 0)
+    .attr('y', 0)
+    .attr('width', mw)
+    .attr('height', mh)
     .style('cursor', 'grab');
 
   // Transparent overlay for click/drag on empty areas
-  minimapG.append('rect')
+  minimapG
+    .append('rect')
     .attr('class', 'minimap-overlay')
-    .attr('x', 0).attr('y', 0).attr('width', mw).attr('height', mh)
+    .attr('x', 0)
+    .attr('y', 0)
+    .attr('width', mw)
+    .attr('height', mh)
     .attr('fill', 'transparent')
     .style('cursor', 'crosshair');
 
   // Drag behavior on the overlay
-  const minimapDrag = d3.drag()
+  const minimapDrag = d3
+    .drag()
     .on('start', (event) => {
-      minimapDragging = true;
+      _minimapDragging = true;
       minimapSvg.style('cursor', 'grabbing');
       panMinimapToEvent(event);
     })
@@ -964,23 +1095,24 @@ function initMinimap() {
       panMinimapToEvent(event);
     })
     .on('end', () => {
-      minimapDragging = false;
+      _minimapDragging = false;
       minimapSvg.style('cursor', 'grab');
     });
 
   minimapG.select('.minimap-overlay').call(minimapDrag);
 
   // Also make the viewport rect draggable
-  const viewportDrag = d3.drag()
-    .on('start', (event) => {
-      minimapDragging = true;
+  const viewportDrag = d3
+    .drag()
+    .on('start', (_event) => {
+      _minimapDragging = true;
       minimapSvg.style('cursor', 'grabbing');
     })
     .on('drag', (event) => {
       panMinimapToEvent(event);
     })
     .on('end', () => {
-      minimapDragging = false;
+      _minimapDragging = false;
       minimapSvg.style('cursor', 'grab');
     });
 
@@ -991,7 +1123,7 @@ function initMinimap() {
 
 function panMinimapToEvent(event) {
   if (!minimapBounds.scale || !svg) return;
-  const { xMin, yMin, scale, cw, ch, padding } = minimapBounds;
+  const { xMin, yMin, scale, padding } = minimapBounds;
 
   // Minimap position to graph coordinates
   const graphX = (event.x - padding) / scale + xMin;
@@ -1003,17 +1135,21 @@ function panMinimapToEvent(event) {
 
 function updateMinimapData(nodeData) {
   if (!minimapG || !minimapInitialized) return;
-  const mw = 180, mh = 120;
+  const mw = 180,
+    mh = 120;
   const container = graphContainer.value;
   if (!container) return;
-  const cw = container.clientWidth, ch = container.clientHeight;
+  const cw = container.clientWidth,
+    ch = container.clientHeight;
 
-  const xs = nodeData.map(n => n.x).filter(v => v != null);
-  const ys = nodeData.map(n => n.y).filter(v => v != null);
+  const xs = nodeData.map((n) => n.x).filter((v) => v !== null);
+  const ys = nodeData.map((n) => n.y).filter((v) => v !== null);
   if (!xs.length) return;
 
-  const xMin = Math.min(...xs), xMax = Math.max(...xs);
-  const yMin = Math.min(...ys), yMax = Math.max(...ys);
+  const xMin = Math.min(...xs),
+    xMax = Math.max(...xs);
+  const yMin = Math.min(...ys),
+    yMax = Math.max(...ys);
   const padding = 8;
   const scaleX = (mw - padding * 2) / (xMax - xMin || 1);
   const scaleY = (mh - padding * 2) / (yMax - yMin || 1);
@@ -1022,20 +1158,20 @@ function updateMinimapData(nodeData) {
   minimapBounds = { xMin, yMin, xMax, yMax, scale, cw, ch, padding, mw, mh };
 
   // Use D3 join for efficient updates (no remove/recreate)
-  const circles = minimapG.selectAll('.minimap-node')
-    .data(nodeData, d => d.id);
+  const circles = minimapG.selectAll('.minimap-node').data(nodeData, (d) => d.id);
 
   circles.exit().remove();
 
-  circles.enter()
+  circles
+    .enter()
     .append('circle')
     .attr('class', 'minimap-node')
     .attr('r', 1.5)
     .attr('opacity', 0.7)
     .merge(circles)
-    .attr('cx', d => padding + (d.x - xMin) * scale)
-    .attr('cy', d => padding + (d.y - yMin) * scale)
-    .attr('fill', d => {
+    .attr('cx', (d) => padding + (d.x - xMin) * scale)
+    .attr('cy', (d) => padding + (d.y - yMin) * scale)
+    .attr('fill', (d) => {
       const p = d.parent || 'Root';
       return parentColors.value[p] || '#818cf8';
     });
@@ -1063,7 +1199,8 @@ function updateMinimapViewport() {
   const vw = visibleW * scale;
   const vh = visibleH * scale;
 
-  minimapG.select('.minimap-viewport')
+  minimapG
+    .select('.minimap-viewport')
     .attr('x', Math.max(0, vx))
     .attr('y', Math.max(0, vy))
     .attr('width', Math.min(mw, vw))
@@ -1075,8 +1212,15 @@ function updateMinimapViewport() {
   <div class="graph-layout">
     <div class="graph-toolbar glass">
       <div class="search-wrapper">
-        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>
+        <svg
+          class="search-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="11" cy="11" r="7" />
+          <path d="M21 21l-4.35-4.35" />
         </svg>
         <input
           v-model="filterText"
@@ -1090,12 +1234,21 @@ function updateMinimapViewport() {
         <!-- Focus Mode toggle -->
         <button
           :class="['tool-btn', { active: focusMode }]"
-          @click="toggleFocusMode"
           title="Focus Mode: dim unrelated nodes on hover"
+          @click="toggleFocusMode"
         >
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"
+            />
           </svg>
           <span>Focus</span>
         </button>
@@ -1103,23 +1256,55 @@ function updateMinimapViewport() {
         <!-- Layout toggle -->
         <button
           :class="['tool-btn', { active: layoutMode === 'tree' }]"
-          @click="toggleLayout"
           :title="layoutMode === 'force' ? 'Switch to Tree layout' : 'Switch to Force layout'"
+          @click="toggleLayout"
         >
-          <svg v-if="layoutMode === 'force'" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="12" cy="18" r="2"/>
-            <path d="M7 7l4 9M17 7l-4 9M7 6h10"/>
+          <svg
+            v-if="layoutMode === 'force'"
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="5" cy="6" r="2" />
+            <circle cx="19" cy="6" r="2" />
+            <circle cx="12" cy="18" r="2" />
+            <path d="M7 7l4 9M17 7l-4 9M7 6h10" />
           </svg>
-          <svg v-else viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2v8M8 10l4-8 4 8M6 18h12M12 10v8"/>
+          <svg
+            v-else
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M12 2v8M8 10l4-8 4 8M6 18h12M12 10v8" />
           </svg>
           <span>{{ layoutMode === 'force' ? 'Force' : 'Tree' }}</span>
         </button>
 
         <!-- Cmd+K hint -->
-        <button class="tool-btn cmd-hint" @click="cmdPaletteOpen = true; nextTick(() => cmdInput?.focus())">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>
+        <button
+          class="tool-btn cmd-hint"
+          @click="
+            cmdPaletteOpen = true;
+            nextTick(() => cmdInput?.focus());
+          "
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="11" cy="11" r="7" />
+            <path d="M21 21l-4.35-4.35" />
           </svg>
           <kbd>⌘K</kbd>
         </button>
@@ -1127,14 +1312,42 @@ function updateMinimapViewport() {
 
       <div class="zoom-controls">
         <button class="zoom-btn" @click="zoomIn">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M12 5v14M5 12h14" />
+          </svg>
         </button>
         <span class="zoom-level">{{ Math.round(zoomLevel * 100) }}%</span>
         <button class="zoom-btn" @click="zoomOut">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M5 12h14" />
+          </svg>
         </button>
         <button class="zoom-btn reset" @click="resetZoom">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 1 3 6.75"/><path d="M3 21v-6h6"/></svg>
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M3 12a9 9 0 1 1 3 6.75" />
+            <path d="M3 21v-6h6" />
+          </svg>
         </button>
       </div>
 
@@ -1142,8 +1355,22 @@ function updateMinimapViewport() {
         <span class="stat-pill">{{ nodes.length }} nodes</span>
         <span class="stat-pill">{{ edges.length }} links</span>
         <button v-if="selectedParents.size > 0" class="clear-filter-btn" @click="clearParentFilter">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-          <span>{{ selectedParents.size }} topic{{ selectedParents.size > 1 ? 's' : '' }} filtered</span>
+          <svg
+            viewBox="0 0 24 24"
+            width="14"
+            height="14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+          <span
+            >{{ selectedParents.size }} topic{{
+              selectedParents.size > 1 ? 's' : ''
+            }}
+            filtered</span
+          >
         </button>
       </div>
     </div>
@@ -1153,31 +1380,60 @@ function updateMinimapViewport() {
         <div class="loading-spinner" />
         <span>Building knowledge graph...</span>
       </div>
-      <div ref="graphContainer" v-show="!loading" class="graph-container" />
+      <div v-show="!loading" ref="graphContainer" class="graph-container" />
 
       <!-- Hover tooltip -->
-      <div v-if="tooltip" class="graph-tooltip glass" :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }">
-        <div class="tooltip-title">{{ tooltip.title }}</div>
+      <div
+        v-if="tooltip"
+        class="graph-tooltip glass"
+        :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }"
+      >
+        <div class="tooltip-title">
+          {{ tooltip.title }}
+        </div>
         <code class="tooltip-key">{{ tooltip.key }}</code>
         <div v-if="tooltipLoading" class="tooltip-loading">
           <div class="tooltip-spinner" />
           <span>Loading preview...</span>
         </div>
-        <p v-else class="tooltip-snippet">{{ tooltipSnippet || 'No content available' }}</p>
+        <p v-else class="tooltip-snippet">
+          {{ tooltipSnippet || 'No content available' }}
+        </p>
       </div>
 
       <!-- Legend -->
       <div v-if="Object.keys(parentColors).length" class="graph-legend glass">
         <div class="legend-header">
           <button class="legend-toggle" @click="legendCollapsed = !legendCollapsed">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
-              :class="{ 'legend-collapsed': legendCollapsed }">
-              <path d="M6 9l6 6 6-6"/>
+            <svg
+              viewBox="0 0 24 24"
+              width="14"
+              height="14"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              :class="{ 'legend-collapsed': legendCollapsed }"
+            >
+              <path d="M6 9l6 6 6-6" />
             </svg>
             <span>{{ legendCollapsed ? 'Legend' : 'Topic Colors' }}</span>
           </button>
-          <button v-if="selectedParents.size > 0" class="legend-clear-icon" @click="clearParentFilter" title="Clear filter">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          <button
+            v-if="selectedParents.size > 0"
+            class="legend-clear-icon"
+            title="Clear filter"
+            @click="clearParentFilter"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="14"
+              height="14"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
           </button>
         </div>
         <transition name="legend-expand">
@@ -1186,7 +1442,9 @@ function updateMinimapViewport() {
               v-for="(color, parent) in parentColors"
               :key="parent"
               class="legend-item"
-              :class="{ 'legend-active': selectedParents.size === 0 || selectedParents.has(parent) }"
+              :class="{
+                'legend-active': selectedParents.size === 0 || selectedParents.has(parent),
+              }"
               @click="toggleParentFilter(parent)"
             >
               <span class="legend-dot" :style="{ background: color }" />
@@ -1204,29 +1462,80 @@ function updateMinimapViewport() {
         <div v-if="selectedNode" class="detail-panel glass">
           <div class="panel-header">
             <div class="panel-title-area">
-              <span class="panel-dot" :style="{ background: parentColors[selectedNode.parent || 'Root'] || 'var(--text-muted)' }" />
+              <span
+                class="panel-dot"
+                :style="{
+                  background: parentColors[selectedNode.parent || 'Root'] || 'var(--text-muted)',
+                }"
+              />
               <h3>{{ selectedNode.title }}</h3>
             </div>
-            <button class="close-btn" @click="selectedNode = null; backlinks = []">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            <button
+              class="close-btn"
+              @click="
+                selectedNode = null;
+                backlinks = [];
+              "
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
             </button>
           </div>
           <div class="panel-meta">
             <code class="meta-key">{{ selectedNode.id }}</code>
             <span class="meta-parent">{{ selectedNode.parent }}</span>
             <span v-if="selectedNode.centrality" class="meta-centrality">
-              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+              <svg
+                viewBox="0 0 24 24"
+                width="12"
+                height="12"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <circle cx="12" cy="12" r="6" />
+                <circle cx="12" cy="12" r="2" />
+              </svg>
               {{ selectedNode.centrality }} connections
             </span>
           </div>
           <button class="view-btn" @click="navigateToSection(selectedNode.id)">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
             View Content
           </button>
 
           <div class="backlinks-section">
             <h4>
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              <svg
+                viewBox="0 0 24 24"
+                width="14"
+                height="14"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+              </svg>
               Incoming Links ({{ backlinks.length }})
             </h4>
             <ul v-if="backlinks.length" class="backlink-list">
@@ -1238,7 +1547,18 @@ function updateMinimapViewport() {
               </li>
             </ul>
             <div v-else class="no-backlinks">
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01M15 9h.01"/></svg>
+              <svg
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M8 15s1.5 2 4 2 4-2 4-2" />
+                <path d="M9 9h.01M15 9h.01" />
+              </svg>
               <p>No incoming links</p>
             </div>
           </div>
@@ -1251,16 +1571,24 @@ function updateMinimapViewport() {
       <div v-if="cmdPaletteOpen" class="cmd-palette-overlay" @click.self="cmdPaletteOpen = false">
         <div class="cmd-palette glass">
           <div class="cmd-input-area">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>
+            <svg
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="M21 21l-4.35-4.35" />
             </svg>
             <input
               ref="cmdInput"
               v-model="cmdQuery"
-              @input="searchCommandPalette"
               type="text"
               placeholder="Search sections by title or tag..."
               class="cmd-input"
+              @input="searchCommandPalette"
             />
             <kbd class="cmd-esc-hint">ESC</kbd>
           </div>
@@ -1280,15 +1608,22 @@ function updateMinimapViewport() {
                 v-for="(result, idx) in cmdResults"
                 :key="result.key"
                 :class="['cmd-result-item', { 'cmd-result-active': idx === cmdSelectedIdx }]"
-                @click="navigateToSection(result.key); cmdPaletteOpen = false"
+                @click="
+                  navigateToSection(result.key);
+                  cmdPaletteOpen = false;
+                "
                 @mouseenter="cmdSelectedIdx = idx"
               >
-                <div class="cmd-result-title">{{ result.title }}</div>
+                <div class="cmd-result-title">
+                  {{ result.title }}
+                </div>
                 <div class="cmd-result-meta">
                   <span class="cmd-result-key">{{ result.key }}</span>
                   <span class="cmd-result-parent">{{ result.parent }}</span>
                 </div>
-                <p v-if="result.snippet" class="cmd-result-snippet">{{ result.snippet }}</p>
+                <p v-if="result.snippet" class="cmd-result-snippet">
+                  {{ result.snippet }}
+                </p>
               </div>
             </template>
           </div>
@@ -1530,7 +1865,9 @@ function updateMinimapViewport() {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Tooltip with glassmorphism */
@@ -1724,7 +2061,9 @@ function updateMinimapViewport() {
 
 .legend-expand-enter-active,
 .legend-expand-leave-active {
-  transition: max-height 0.25s ease, opacity 0.2s;
+  transition:
+    max-height 0.25s ease,
+    opacity 0.2s;
   overflow: hidden;
 }
 
@@ -1790,7 +2129,9 @@ function updateMinimapViewport() {
 
 .slide-panel-enter-active,
 .slide-panel-leave-active {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s;
 }
 
 .slide-panel-enter-from,
@@ -2064,7 +2405,8 @@ function updateMinimapViewport() {
   animation: spin 0.6s linear infinite;
 }
 
-.cmd-no-results, .cmd-hint-text {
+.cmd-no-results,
+.cmd-hint-text {
   text-align: center;
   padding: 24px;
   color: var(--text-muted);
@@ -2137,10 +2479,12 @@ function updateMinimapViewport() {
   margin-right: 4px;
 }
 
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.2s;
 }
-.fade-enter-from, .fade-leave-to {
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
 }
 </style>

@@ -30,24 +30,28 @@ src/
 ## Coding Conventions
 
 ### Vue Components
+
 - Use `<script setup>` syntax exclusively
 - Use `ref()` and `computed()` for reactivity
 - Prefer composition functions in `src/composables/`
 - Component files use PascalCase (e.g., `KnowledgeGraph.vue`)
 
 ### JavaScript
+
 - ES modules only (`type: "module"` in package.json)
 - Use `const` by default, `let` when reassignment needed
 - Arrow functions preferred
 - No semicolons unless required
 
 ### CSS
+
 - Global CSS variables defined in `src/style.css`
 - Scoped styles within components using `<style scoped>`
 - Use CSS variables for theming (`var(--bg)`, `var(--accent)`, etc.)
 - Dark mode is the primary theme
 
 ### Naming
+
 - Components: PascalCase (`KnowledgeGraph.vue`)
 - Composables: camelCase with `use` prefix (`useWikiApi.js`)
 - Variables/Functions: camelCase
@@ -56,16 +60,19 @@ src/
 ## D3.js Graph Conventions (KnowledgeGraph.vue)
 
 ### Node Styling
+
 - Nodes use radial gradients based on parent color
 - Node radius scales with centrality (link count)
 - Color palette: 20 high-contrast colors for dark backgrounds
 
 ### Background Layers
+
 - Dark radial gradient background (`#18181b` → `#09090b`)
 - Animated concentric circles via `createAnimatedCircles()` helper
 - Multiple layers with different colors, opacities, and timing
 
 ### Interactions
+
 - Hover: highlights connected nodes/edges, shows tooltip
 - Click: selects node, opens detail panel, keeps neighbors highlighted
 - Background click: clears selection, resets highlights
@@ -73,19 +80,25 @@ src/
 - Zoom: mouse wheel / trackpad pinch
 
 ### Filter Awareness
+
 - All highlight/reset functions must respect `selectedParents` and `filterText`
 - Never reset node opacity to `1` — always check active filters first
 
 ## Key Patterns
 
 ### D3 Selection Pattern
+
 ```js
 d3.selectAll('.graph-node')
-  .transition().duration(300)
-  .attr('opacity', d => { /* respect filters */ });
+  .transition()
+  .duration(300)
+  .attr('opacity', (d) => {
+    /* respect filters */
+  });
 ```
 
 ### Filter-Aware Opacity
+
 ```js
 function getNodeOpacity(d) {
   const parent = d.parent || 'Root';

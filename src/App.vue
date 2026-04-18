@@ -34,7 +34,11 @@ onMounted(async () => {
 
 function selectView(viewId) {
   activeView.value = viewId;
-  pushBreadcrumb(viewId.charAt(0).toUpperCase() + viewId.slice(1), { name: viewId }, { replace: true });
+  pushBreadcrumb(
+    viewId.charAt(0).toUpperCase() + viewId.slice(1),
+    { name: viewId },
+    { replace: true },
+  );
   router.push({ name: viewId, query: selectedWiki.value ? { wikiId: selectedWiki.value } : {} });
 }
 
@@ -50,8 +54,10 @@ function onWikiChange() {
         <div class="header-left">
           <div class="logo-mark">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              <circle cx="12" cy="12" r="3" />
+              <path
+                d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"
+              />
             </svg>
           </div>
           <div class="logo-text">
@@ -67,23 +73,34 @@ function onWikiChange() {
             :class="['nav-btn', { active: activeView === view.id }]"
             @click="selectView(view.id)"
           >
-            <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <svg
+              class="nav-icon-svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <template v-if="view.icon === 'graph'">
-                <circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="12" cy="18" r="2"/>
-                <path d="M7 7l4 9M17 7l-4 9M7 6h10"/>
+                <circle cx="5" cy="6" r="2" />
+                <circle cx="19" cy="6" r="2" />
+                <circle cx="12" cy="18" r="2" />
+                <path d="M7 7l4 9M17 7l-4 9M7 6h10" />
               </template>
               <template v-else-if="view.icon === 'search'">
-                <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>
+                <circle cx="11" cy="11" r="7" />
+                <path d="M21 21l-4.35-4.35" />
               </template>
               <template v-else-if="view.icon === 'topics'">
-                <path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/>
+                <path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" />
               </template>
               <template v-else-if="view.icon === 'health'">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                <path d="M9 12l2 2 4-4"/>
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <path d="M9 12l2 2 4-4" />
               </template>
               <template v-else-if="view.icon === 'stats'">
-                <path d="M18 20V10M12 20V4M6 20v-6"/>
+                <path d="M18 20V10M12 20V4M6 20v-6" />
               </template>
             </svg>
             <span class="nav-label">{{ view.label }}</span>
@@ -91,31 +108,42 @@ function onWikiChange() {
         </nav>
 
         <div class="header-right">
-          <select v-if="wikis.length > 1" v-model="selectedWiki" @change="onWikiChange" class="wiki-select">
+          <select
+            v-if="wikis.length > 1"
+            v-model="selectedWiki"
+            class="wiki-select"
+            @change="onWikiChange"
+          >
             <option value="">All Wikis</option>
-            <option v-for="w in wikis" :key="w.wikiId" :value="w.wikiId">{{ w.wikiId }}</option>
+            <option v-for="w in wikis" :key="w.wikiId" :value="w.wikiId">
+              {{ w.wikiId }}
+            </option>
           </select>
         </div>
       </div>
     </header>
 
     <div class="breadcrumb-bar">
-      <span
-        v-for="(crumb, idx) in currentBreadcrumb"
-        :key="idx"
-        class="breadcrumb-item"
-      >
-        <span
-          v-if="idx > 0"
-          class="breadcrumb-sep">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      <span v-for="(crumb, idx) in currentBreadcrumb" :key="idx" class="breadcrumb-item">
+        <span v-if="idx > 0" class="breadcrumb-sep">
+          <svg
+            viewBox="0 0 24 24"
+            width="14"
+            height="14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M9 18l6-6-6-6" />
+          </svg>
         </span>
         <a
           v-if="idx < currentBreadcrumb.length - 1"
           href="#"
-          @click.prevent="navigateTo(idx)"
           class="breadcrumb-link"
-        >{{ crumb }}</a>
+          @click.prevent="navigateTo(idx)"
+          >{{ crumb }}</a
+        >
         <span v-else class="breadcrumb-current">{{ crumb }}</span>
       </span>
     </div>
@@ -368,6 +396,8 @@ function onWikiChange() {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

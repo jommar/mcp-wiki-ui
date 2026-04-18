@@ -11,18 +11,21 @@ const loading = ref(true);
 
 const totalIssues = computed(() => {
   if (!validation.value) return 0;
-  return (validation.value.emptySections?.length || 0) +
+  return (
+    (validation.value.emptySections?.length || 0) +
     (validation.value.orphanedSections?.length || 0) +
-    (validation.value.unlinkedSections?.length || 0);
+    (validation.value.unlinkedSections?.length || 0)
+  );
 });
 
 const healthScore = computed(() => {
   if (!validation.value) return 100;
-  const total = (validation.value.emptySections?.length || 0) +
+  const total =
+    (validation.value.emptySections?.length || 0) +
     (validation.value.orphanedSections?.length || 0) +
     (validation.value.unlinkedSections?.length || 0);
   if (total === 0) return 100;
-  return Math.max(0, Math.round(100 - (total * 2)));
+  return Math.max(0, Math.round(100 - total * 2));
 });
 
 const healthColor = computed(() => {
@@ -48,9 +51,12 @@ onMounted(async () => {
   await loadValidation();
 });
 
-watch(() => props.wikiId, async () => {
-  await loadValidation();
-});
+watch(
+  () => props.wikiId,
+  async () => {
+    await loadValidation();
+  },
+);
 
 async function loadValidation() {
   loading.value = true;
@@ -64,7 +70,11 @@ async function loadValidation() {
 }
 
 function navigateTo(key) {
-  router.push({ name: 'section', params: { sectionKey: key }, query: props.wikiId ? { wikiId: props.wikiId } : {} });
+  router.push({
+    name: 'section',
+    params: { sectionKey: key },
+    query: props.wikiId ? { wikiId: props.wikiId } : {},
+  });
 }
 </script>
 
@@ -73,21 +83,43 @@ function navigateTo(key) {
     <div class="report-header">
       <div class="header-content">
         <h2>
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            <path d="M9 12l2 2 4-4"/>
+          <svg
+            viewBox="0 0 24 24"
+            width="22"
+            height="22"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            <path d="M9 12l2 2 4-4" />
           </svg>
           Health & Integrity Report
         </h2>
         <p class="header-desc">Monitor wiki quality and detect issues</p>
       </div>
-      <button class="refresh-btn" @click="loadValidation" :disabled="loading">
-        <svg v-if="loading" class="btn-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+      <button class="refresh-btn" :disabled="loading" @click="loadValidation">
+        <svg
+          v-if="loading"
+          class="btn-spinner"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M21 12a9 9 0 1 1-6.219-8.56" />
         </svg>
-        <svg v-else viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 2v4h-4M3 22v-4h4"/>
-          <path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 12a9 9 0 0 1-15 6.7L3 16"/>
+        <svg
+          v-else
+          viewBox="0 0 24 24"
+          width="16"
+          height="16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M21 2v4h-4M3 22v-4h4" />
+          <path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 12a9 9 0 0 1-15 6.7L3 16" />
         </svg>
         {{ loading ? 'Checking...' : 'Refresh' }}
       </button>
@@ -106,7 +138,9 @@ function navigateTo(key) {
         </div>
         <div class="score-details">
           <span class="score-status" :style="{ color: healthColor }">{{ healthLabel }}</span>
-          <span class="total-issues">{{ totalIssues }} issue{{ totalIssues !== 1 ? 's' : '' }} found</span>
+          <span class="total-issues"
+            >{{ totalIssues }} issue{{ totalIssues !== 1 ? 's' : '' }} found</span
+          >
         </div>
       </div>
 
@@ -114,9 +148,18 @@ function navigateTo(key) {
         <div class="issue-card empty">
           <div class="issue-header">
             <div class="issue-icon warning">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                <path d="M12 9v4M12 17h.01"/>
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                />
+                <path d="M12 9v4M12 17h.01" />
               </svg>
             </div>
             <h3>Empty Sections</h3>
@@ -130,9 +173,16 @@ function navigateTo(key) {
             </li>
           </ul>
           <div v-else class="no-issues">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-              <path d="M22 4L12 14.01l-3-3"/>
+            <svg
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <path d="M22 4L12 14.01l-3-3" />
             </svg>
             <span>All sections have content</span>
           </div>
@@ -141,8 +191,16 @@ function navigateTo(key) {
         <div class="issue-card orphaned">
           <div class="issue-header">
             <div class="issue-icon danger">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/>
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M4.93 4.93l14.14 14.14" />
               </svg>
             </div>
             <h3>Orphaned Sections</h3>
@@ -156,9 +214,16 @@ function navigateTo(key) {
             </li>
           </ul>
           <div v-else class="no-issues">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-              <path d="M22 4L12 14.01l-3-3"/>
+            <svg
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <path d="M22 4L12 14.01l-3-3" />
             </svg>
             <span>No orphaned sections</span>
           </div>
@@ -167,9 +232,16 @@ function navigateTo(key) {
         <div class="issue-card unlinked">
           <div class="issue-header">
             <div class="issue-icon info">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
               </svg>
             </div>
             <h3>Unlinked Sections</h3>
@@ -183,9 +255,16 @@ function navigateTo(key) {
             </li>
           </ul>
           <div v-else class="no-issues">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-              <path d="M22 4L12 14.01l-3-3"/>
+            <svg
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <path d="M22 4L12 14.01l-3-3" />
             </svg>
             <span>All sections are linked</span>
           </div>
@@ -266,7 +345,9 @@ function navigateTo(key) {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-state {

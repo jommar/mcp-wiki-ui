@@ -15,18 +15,18 @@ Wiki-UI provides a comprehensive suite of tools for navigating and understanding
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| **Frontend** | Vue 3 (Composition API, `<script setup>`) |
-| **Build** | Vite 8 |
-| **Routing** | Vue Router 4 |
-| **Visualization** | D3.js 7 |
-| **Markdown** | Marked 18 |
-| **Diagrams** | Mermaid 11 |
-| **Syntax Highlighting** | Highlight.js 11 |
-| **Backend** | Express 5 |
-| **Database** | PostgreSQL (via `pg`) |
-| **Diff Engine** | diff 9 |
+| Layer                   | Technology                                |
+| ----------------------- | ----------------------------------------- |
+| **Frontend**            | Vue 3 (Composition API, `<script setup>`) |
+| **Build**               | Vite 8                                    |
+| **Routing**             | Vue Router 4                              |
+| **Visualization**       | D3.js 7                                   |
+| **Markdown**            | Marked 18                                 |
+| **Diagrams**            | Mermaid 11                                |
+| **Syntax Highlighting** | Highlight.js 11                           |
+| **Backend**             | Express 5                                 |
+| **Database**            | PostgreSQL (via `pg`)                     |
+| **Diff Engine**         | diff 9                                    |
 
 ## Getting Started
 
@@ -94,6 +94,7 @@ wiki-ui/
 ## Features
 
 ### Knowledge Graph
+
 - Force-directed layout with parent-based clustering
 - Interactive node selection with persistent neighbor highlighting
 - Focus mode for isolating connected subgraphs
@@ -106,17 +107,20 @@ wiki-ui/
 - Zoom and pan with mouse/trackpad
 
 ### Section Viewer
+
 - Markdown rendering with syntax highlighting
 - Mermaid diagram rendering
 - Section navigation with backlinks
 - Content diff visualization
 
 ### Search
+
 - Full-text search across all wiki sections
 - Result ranking and snippet extraction
 - Filter by topic/parent
 
 ### Health Report
+
 - Empty section detection
 - Orphaned section identification
 - Unlinked section analysis
@@ -125,14 +129,14 @@ wiki-ui/
 
 The Express server provides the following endpoints:
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/sections` | List all wiki sections |
-| `GET` | `/api/sections/:key` | Get section content |
-| `GET` | `/api/backlinks/:key` | Get backlinks for a section |
-| `GET` | `/api/search?q=` | Full-text search |
-| `GET` | `/api/stats` | Wiki statistics |
-| `GET` | `/api/health` | Wiki health report |
+| Method | Endpoint              | Description                 |
+| ------ | --------------------- | --------------------------- |
+| `GET`  | `/api/sections`       | List all wiki sections      |
+| `GET`  | `/api/sections/:key`  | Get section content         |
+| `GET`  | `/api/backlinks/:key` | Get backlinks for a section |
+| `GET`  | `/api/search?q=`      | Full-text search            |
+| `GET`  | `/api/stats`          | Wiki statistics             |
+| `GET`  | `/api/health`         | Wiki health report          |
 
 ## License
 

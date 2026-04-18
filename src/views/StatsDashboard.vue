@@ -16,9 +16,12 @@ onMounted(async () => {
   await loadData();
 });
 
-watch(() => props.wikiId, async () => {
-  await loadData();
-});
+watch(
+  () => props.wikiId,
+  async () => {
+    await loadData();
+  },
+);
 
 async function loadData() {
   loading.value = true;
@@ -42,7 +45,7 @@ async function loadData() {
 
 function computeParentDistribution() {
   const parentCounts = {};
-  sections.value.forEach(s => {
+  sections.value.forEach((s) => {
     const parent = s.parent || 'Root';
     parentCounts[parent] = (parentCounts[parent] || 0) + 1;
   });
@@ -61,7 +64,7 @@ function computeContentSizeDistribution() {
     { label: 'XL', sub: '5k-10k', min: 5000, max: 10000, count: 0 },
     { label: 'Huge', sub: '10k+', min: 10000, max: Infinity, count: 0 },
   ];
-  sections.value.forEach(s => {
+  sections.value.forEach((s) => {
     const len = s.contentLength || 0;
     for (const bucket of buckets) {
       if (len >= bucket.min && len < bucket.max) {
@@ -80,11 +83,11 @@ function formatUptime(seconds) {
 }
 
 const maxParentCount = computed(() => {
-  return Math.max(...parentDistribution.value.map(p => p.count), 1);
+  return Math.max(...parentDistribution.value.map((p) => p.count), 1);
 });
 
 const maxContentBucket = computed(() => {
-  return Math.max(...contentSizeDistribution.value.map(b => b.count), 1);
+  return Math.max(...contentSizeDistribution.value.map((b) => b.count), 1);
 });
 </script>
 
@@ -93,8 +96,15 @@ const maxContentBucket = computed(() => {
     <div class="stats-header">
       <div class="header-content">
         <h2>
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 20V10M12 20V4M6 20v-6"/>
+          <svg
+            viewBox="0 0 24 24"
+            width="22"
+            height="22"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M18 20V10M12 20V4M6 20v-6" />
           </svg>
           Wiki Statistics
         </h2>
@@ -111,8 +121,16 @@ const maxContentBucket = computed(() => {
       <div class="stats-overview">
         <div class="stat-card">
           <div class="stat-icon">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>
+            <svg
+              viewBox="0 0 24 24"
+              width="22"
+              height="22"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <path d="M14 2v6h6" />
             </svg>
           </div>
           <span class="stat-value">{{ sections.length }}</span>
@@ -120,8 +138,16 @@ const maxContentBucket = computed(() => {
         </div>
         <div class="stat-card">
           <div class="stat-icon">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+            <svg
+              viewBox="0 0 24 24"
+              width="22"
+              height="22"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect x="2" y="3" width="20" height="14" rx="2" />
+              <path d="M8 21h8M12 17v4" />
             </svg>
           </div>
           <span class="stat-value">{{ wikiDistribution.length }}</span>
@@ -129,8 +155,17 @@ const maxContentBucket = computed(() => {
         </div>
         <div class="stat-card">
           <div class="stat-icon">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            <svg
+              viewBox="0 0 24 24"
+              width="22"
+              height="22"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+              />
             </svg>
           </div>
           <span class="stat-value">{{ parentDistribution.length }}</span>
@@ -138,8 +173,16 @@ const maxContentBucket = computed(() => {
         </div>
         <div class="stat-card">
           <div class="stat-icon">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+            <svg
+              viewBox="0 0 24 24"
+              width="22"
+              height="22"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 6v6l4 2" />
             </svg>
           </div>
           <span class="stat-value">{{ stats?.uptime ? formatUptime(stats.uptime) : 'N/A' }}</span>
@@ -151,23 +194,29 @@ const maxContentBucket = computed(() => {
         <div class="chart-card">
           <div class="chart-header">
             <h3>
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+              <svg
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <path d="M8 21h8M12 17v4" />
               </svg>
               Wiki Distribution
             </h3>
           </div>
           <div class="bar-chart">
-            <div
-              v-for="wiki in wikiDistribution"
-              :key="wiki.wikiId"
-              class="bar-row"
-            >
+            <div v-for="wiki in wikiDistribution" :key="wiki.wikiId" class="bar-row">
               <span class="bar-label">{{ wiki.wikiId }}</span>
               <div class="bar-track">
                 <div
                   class="bar-fill"
-                  :style="{ width: `${(wiki.sectionCount / Math.max(...wikiDistribution.map(w => w.sectionCount), 1)) * 100}%` }"
+                  :style="{
+                    width: `${(wiki.sectionCount / Math.max(...wikiDistribution.map((w) => w.sectionCount), 1)) * 100}%`,
+                  }"
                 />
               </div>
               <span class="bar-value">{{ wiki.sectionCount }}</span>
@@ -178,18 +227,23 @@ const maxContentBucket = computed(() => {
         <div class="chart-card">
           <div class="chart-header">
             <h3>
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              <svg
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+                />
               </svg>
               Top Topic Groups
             </h3>
           </div>
           <div class="bar-chart">
-            <div
-              v-for="group in parentDistribution"
-              :key="group.parent"
-              class="bar-row"
-            >
+            <div v-for="group in parentDistribution" :key="group.parent" class="bar-row">
               <span class="bar-label">{{ group.parent }}</span>
               <div class="bar-track">
                 <div
@@ -205,8 +259,15 @@ const maxContentBucket = computed(() => {
         <div class="chart-card">
           <div class="chart-header">
             <h3>
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M18 20V10M12 20V4M6 20v-6"/>
+              <svg
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M18 20V10M12 20V4M6 20v-6" />
               </svg>
               Content Size Distribution
             </h3>
@@ -284,7 +345,9 @@ const maxContentBucket = computed(() => {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .stats-overview {

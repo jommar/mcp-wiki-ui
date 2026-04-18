@@ -12,12 +12,12 @@ export function useNavigation() {
       // Append — used for nested navigation (clicking a node, drilling into content)
       navigationHistory.value.push({ label, route });
     }
-    currentBreadcrumb.value = navigationHistory.value.map(b => b.label);
+    currentBreadcrumb.value = navigationHistory.value.map((b) => b.label);
   }
 
   function navigateTo(index) {
     navigationHistory.value = navigationHistory.value.slice(0, index + 1);
-    currentBreadcrumb.value = navigationHistory.value.map(b => b.label);
+    currentBreadcrumb.value = navigationHistory.value.map((b) => b.label);
   }
 
   function clearHistory() {

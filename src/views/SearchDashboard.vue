@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { wikiApi } from '../api/wiki.js';
 
@@ -13,12 +13,12 @@ const hasSearched = ref(false);
 
 const maxRank = computed(() => {
   if (!results.value.length) return 1;
-  return Math.max(...results.value.map(r => r.rank || 0), 1);
+  return Math.max(...results.value.map((r) => r.rank || 0), 1);
 });
 
 const rankDistribution = computed(() => {
   const buckets = [0, 0, 0, 0, 0];
-  results.value.forEach(r => {
+  results.value.forEach((r) => {
     const normalized = (r.rank || 0) / maxRank.value;
     const idx = Math.min(4, Math.floor(normalized * 5));
     buckets[idx]++;
@@ -44,7 +44,11 @@ async function performSearch() {
 }
 
 function navigateTo(key) {
-  router.push({ name: 'section', params: { sectionKey: key }, query: props.wikiId ? { wikiId: props.wikiId } : {} });
+  router.push({
+    name: 'section',
+    params: { sectionKey: key },
+    query: props.wikiId ? { wikiId: props.wikiId } : {},
+  });
 }
 
 function onKeydown(e) {
@@ -57,16 +61,31 @@ function onKeydown(e) {
     <div class="search-header">
       <div class="header-content">
         <h2>
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>
+          <svg
+            viewBox="0 0 24 24"
+            width="22"
+            height="22"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="11" cy="11" r="7" />
+            <path d="M21 21l-4.35-4.35" />
           </svg>
           Search Explorer
         </h2>
         <p class="header-desc">Find wiki sections by keyword or topic</p>
       </div>
       <div class="search-bar">
-        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>
+        <svg
+          class="search-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="11" cy="11" r="7" />
+          <path d="M21 21l-4.35-4.35" />
         </svg>
         <input
           v-model="searchQuery"
@@ -75,11 +94,18 @@ function onKeydown(e) {
           class="search-input"
           @keydown="onKeydown"
         />
-        <button class="search-btn" @click="performSearch" :disabled="loading">
-          <svg v-if="loading" class="btn-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+        <button class="search-btn" :disabled="loading" @click="performSearch">
+          <svg
+            v-if="loading"
+            class="btn-spinner"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
           </svg>
-          <template v-else>Search</template>
+          <template v-else> Search </template>
         </button>
       </div>
     </div>
@@ -93,11 +119,7 @@ function onKeydown(e) {
         <div class="rank-distribution">
           <span class="dist-label">Rank:</span>
           <div class="dist-bars">
-            <div
-              v-for="(count, idx) in rankDistribution"
-              :key="idx"
-              class="dist-bar-wrapper"
-            >
+            <div v-for="(count, idx) in rankDistribution" :key="idx" class="dist-bar-wrapper">
               <div
                 class="dist-bar"
                 :style="{ height: `${Math.max(8, (count / results.length) * 60)}px` }"
@@ -111,11 +133,7 @@ function onKeydown(e) {
       </div>
 
       <div class="results-list">
-        <div
-          v-for="(result, idx) in results"
-          :key="result.key"
-          class="result-card"
-        >
+        <div v-for="(result, idx) in results" :key="result.key" class="result-card">
           <div class="result-rank">
             <span class="rank-badge">#{{ idx + 1 }}</span>
             <span v-if="result.rank" class="rank-score">{{ result.rank.toFixed(3) }}</span>
@@ -127,26 +145,47 @@ function onKeydown(e) {
             <div class="result-meta">
               <span class="result-key">{{ result.key }}</span>
               <span class="result-parent">{{ result.parent }}</span>
-              <span v-if="result.contentLength" class="result-length">{{ result.contentLength.toLocaleString() }} chars</span>
+              <span v-if="result.contentLength" class="result-length"
+                >{{ result.contentLength.toLocaleString() }} chars</span
+              >
             </div>
-            <p v-if="result.snippet" class="result-snippet">{{ result.snippet }}</p>
+            <p v-if="result.snippet" class="result-snippet">
+              {{ result.snippet }}
+            </p>
           </div>
         </div>
       </div>
     </div>
 
     <div v-else-if="hasSearched && !results.length" class="no-results">
-      <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
-        <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>
-        <path d="M8 11h6"/>
+      <svg
+        viewBox="0 0 24 24"
+        width="48"
+        height="48"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+      >
+        <circle cx="11" cy="11" r="7" />
+        <path d="M21 21l-4.35-4.35" />
+        <path d="M8 11h6" />
       </svg>
       <p>No results found for "{{ searchQuery }}"</p>
     </div>
 
     <div v-else class="search-placeholder">
-      <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3">
-        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-        <path d="M11 8v6M8 11h6"/>
+      <svg
+        viewBox="0 0 24 24"
+        width="64"
+        height="64"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1"
+        opacity="0.3"
+      >
+        <circle cx="11" cy="11" r="8" />
+        <path d="M21 21l-4.35-4.35" />
+        <path d="M11 8v6M8 11h6" />
       </svg>
       <p>Enter a search query to explore wiki content</p>
     </div>
@@ -219,7 +258,9 @@ function onKeydown(e) {
 .search-input:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-bg), var(--shadow-sm);
+  box-shadow:
+    0 0 0 3px var(--accent-bg),
+    var(--shadow-sm);
 }
 
 .search-input::placeholder {
@@ -261,7 +302,9 @@ function onKeydown(e) {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .results-summary {
@@ -432,7 +475,8 @@ function onKeydown(e) {
   border-left: 2px solid var(--border);
 }
 
-.no-results, .search-placeholder {
+.no-results,
+.search-placeholder {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -443,7 +487,8 @@ function onKeydown(e) {
   font-size: 14px;
 }
 
-.no-results svg, .search-placeholder svg {
+.no-results svg,
+.search-placeholder svg {
   opacity: 0.2;
 }
 </style>

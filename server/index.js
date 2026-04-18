@@ -19,12 +19,18 @@ app.get('/api/wiki/info', async (req, res) => {
         'SELECT COUNT(*) as section_count FROM wiki_sections WHERE wiki_id = $1',
         [wikiId],
       ));
-      return res.json({ wikis: [{ wikiId, sectionCount: parseInt(rows[0].section_count) }], uptime: (Date.now() - startedAt) / 1000 });
+      return res.json({
+        wikis: [{ wikiId, sectionCount: parseInt(rows[0].section_count) }],
+        uptime: (Date.now() - startedAt) / 1000,
+      });
     }
     ({ rows } = await pool.query(
       'SELECT wiki_id, COUNT(*) as section_count FROM wiki_sections GROUP BY wiki_id ORDER BY wiki_id',
     ));
-    res.json({ wikis: rows.map(r => ({ wikiId: r.wiki_id, sectionCount: parseInt(r.section_count) })), uptime: (Date.now() - startedAt) / 1000 });
+    res.json({
+      wikis: rows.map((r) => ({ wikiId: r.wiki_id, sectionCount: parseInt(r.section_count) })),
+      uptime: (Date.now() - startedAt) / 1000,
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -37,7 +43,7 @@ app.get('/api/wiki/sections', async (req, res) => {
       ? 'SELECT key, wiki_id, parent, title, metadata, LENGTH(content) as content_length FROM wiki_sections WHERE wiki_id = $1 ORDER BY key LIMIT $2'
       : 'SELECT key, wiki_id, parent, title, metadata, LENGTH(content) as content_length FROM wiki_sections ORDER BY wiki_id, key LIMIT $1';
     const { rows } = await pool.query(query, wikiId ? [wikiId, limit] : [limit]);
-    const sections = rows.map(r => ({
+    const sections = rows.map((r) => ({
       key: r.key,
       wikiId: r.wiki_id,
       parent: r.parent || 'Root',
@@ -61,7 +67,9 @@ app.get('/api/wiki/browse', async (req, res) => {
     const params = [];
     const conditions = [];
     if (topic) {
-      conditions.push(`(LOWER(parent) LIKE $${params.length + 1} OR LOWER(title) LIKE $${params.length + 1} OR metadata->>'breadcrumbs' ILIKE $${params.length + 1})`);
+      conditions.push(
+        `(LOWER(parent) LIKE $${params.length + 1} OR LOWER(title) LIKE $${params.length + 1} OR metadata->>'breadcrumbs' ILIKE $${params.length + 1})`,
+      );
       params.push(`%${topic.toLowerCase()}%`);
     }
     if (wikiId) {
@@ -72,7 +80,7 @@ app.get('/api/wiki/browse', async (req, res) => {
     query += ' ORDER BY parent, key LIMIT $' + (params.length + 1);
     params.push(limit);
     const { rows } = await pool.query(query, params);
-    const sections = rows.map(r => ({
+    const sections = rows.map((r) => ({
       key: r.key,
       wikiId: r.wiki_id,
       parent: r.parent || 'Root',
@@ -94,7 +102,7 @@ app.get('/api/wiki/browse', async (req, res) => {
 
 app.get('/api/wiki/search', async (req, res) => {
   try {
-    const { query, wikiId, fuzzy = false, limit = 20 } = req.query;
+    const { query, wikiId, limit = 20 } = req.query;
     if (!query) return res.status(400).json({ error: 'query is required' });
     const lim = parseInt(limit);
     const params = [];
@@ -103,7 +111,12 @@ app.get('/api/wiki/search', async (req, res) => {
       whereClause = `WHERE wiki_id = $${params.length + 1}`;
       params.push(wikiId);
     }
-    const searchTerms = query.toLowerCase().split(/\s+/).filter(Boolean).map(t => t + ':*').join(' & ');
+    const searchTerms = query
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((t) => t + ':*')
+      .join(' & ');
     const searchQuery = `
       SELECT key, wiki_id, parent, title, metadata->'breadcrumbs' as breadcrumbs,
              ts_rank(search_vector, to_tsquery('english', $${params.length + 1})) as rank,
@@ -116,13 +129,16 @@ app.get('/api/wiki/search', async (req, res) => {
     `;
     params.push(searchTerms, lim);
     const { rows } = await pool.query(searchQuery, params);
-    const results = rows.map(r => {
+    const results = rows.map((r) => {
       const idx = r.content?.toLowerCase().indexOf(query.toLowerCase());
       let snippet;
       if (idx !== undefined && idx >= 0) {
         const start = Math.max(0, idx - 80);
         const end = Math.min(r.content.length, idx + query.length + 80);
-        snippet = (start > 0 ? '...' : '') + r.content.slice(start, end) + (end < r.content.length ? '...' : '');
+        snippet =
+          (start > 0 ? '...' : '') +
+          r.content.slice(start, end) +
+          (end < r.content.length ? '...' : '');
       }
       return {
         key: r.key,
@@ -181,7 +197,7 @@ app.get('/api/wiki/section/:key', async (req, res) => {
       limit: parseInt(limit),
       hasMore,
       nextOffset: hasMore ? parseInt(offset) + parseInt(limit) : undefined,
-      relatedSections: relatedRows.map(r => ({ key: r.key, title: r.title })),
+      relatedSections: relatedRows.map((r) => ({ key: r.key, title: r.title })),
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -191,7 +207,8 @@ app.get('/api/wiki/section/:key', async (req, res) => {
 app.get('/api/wiki/sections/batch', async (req, res) => {
   try {
     const { keys, wikiId } = req.query;
-    if (!keys) return res.status(400).json({ error: 'keys query param required (comma-separated)' });
+    if (!keys)
+      return res.status(400).json({ error: 'keys query param required (comma-separated)' });
     const keyArr = keys.split(',');
     const params = [keyArr];
     let whereClause = 'WHERE key = ANY($1)';
@@ -205,7 +222,7 @@ app.get('/api/wiki/sections/batch', async (req, res) => {
       params,
     );
     const truncateLimit = 8000;
-    const sections = rows.map(r => {
+    const sections = rows.map((r) => {
       const truncated = r.total_length > truncateLimit;
       return {
         key: r.key,
@@ -244,7 +261,7 @@ app.get('/api/wiki/backlinks/:key', async (req, res) => {
     `;
     const { rows } = await pool.query(query, params);
     res.json({
-      backlinks: rows.map(r => ({
+      backlinks: rows.map((r) => ({
         key: r.from_key,
         wikiId: r.from_wiki_id,
         title: r.from_title,
@@ -287,9 +304,9 @@ app.get('/api/wiki/validate', async (req, res) => {
       params,
     );
     res.json({
-      emptySections: empty.map(r => ({ key: r.key, title: r.title })),
-      orphanedSections: orphans.map(r => ({ key: r.key, title: r.title })),
-      unlinkedSections: unlinked.map(r => ({ key: r.key, title: r.title })),
+      emptySections: empty.map((r) => ({ key: r.key, title: r.title })),
+      orphanedSections: orphans.map((r) => ({ key: r.key, title: r.title })),
+      unlinkedSections: unlinked.map((r) => ({ key: r.key, title: r.title })),
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -310,7 +327,7 @@ app.get('/api/wiki/history/:key', async (req, res) => {
       [wikiId, key, parseInt(limit)],
     );
     res.json({
-      history: rows.map(h => ({
+      history: rows.map((h) => ({
         contentBefore: h.content_before ?? undefined,
         contentAfter: h.content_after,
         changedAt: h.changed_at instanceof Date ? h.changed_at.toISOString() : String(h.changed_at),
@@ -344,14 +361,14 @@ app.get('/api/wiki/graph', async (req, res) => {
        ${wikiId ? 'WHERE ws_from.wiki_id = $1 AND ws_to.wiki_id = $1' : ''}`,
       wikiId ? [wikiId] : [],
     );
-    const nodes = sections.map(s => ({
+    const nodes = sections.map((s) => ({
       id: s.key,
       wikiId: s.wiki_id,
       title: s.title,
       parent: s.parent || 'Root',
       contentLength: s.content_length,
     }));
-    const edges = links.map(l => ({
+    const edges = links.map((l) => ({
       source: l.from_key,
       target: l.to_key,
       sourceWikiId: l.from_wiki_id,

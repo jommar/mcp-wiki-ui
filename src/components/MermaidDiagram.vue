@@ -53,10 +53,13 @@ onMounted(async () => {
   await renderDiagram();
 });
 
-watch(() => props.code, async () => {
-  renderId.value = `mermaid-${Math.random().toString(36).slice(2, 9)}`;
-  await renderDiagram();
-});
+watch(
+  () => props.code,
+  async () => {
+    renderId.value = `mermaid-${Math.random().toString(36).slice(2, 9)}`;
+    await renderDiagram();
+  },
+);
 </script>
 
 <template>
@@ -66,9 +69,18 @@ watch(() => props.code, async () => {
       <span>Rendering diagram...</span>
     </div>
     <div v-else-if="error" class="mermaid-error">
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-        <path d="M12 9v4M12 17h.01"/>
+      <svg
+        viewBox="0 0 24 24"
+        width="16"
+        height="16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path
+          d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+        />
+        <path d="M12 9v4M12 17h.01" />
       </svg>
       <span>{{ error }}</span>
     </div>
@@ -117,7 +129,9 @@ watch(() => props.code, async () => {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .mermaid-error {
