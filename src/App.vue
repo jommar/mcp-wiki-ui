@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { wikiApi } from './api/wiki.js';
 import { useNavigation } from './composables/useNavigation.js';
+import GlobalSearch from './components/GlobalSearch.vue';
 
 const router = useRouter();
 const { currentBreadcrumb, pushBreadcrumb, navigateTo } = useNavigation();
@@ -11,6 +12,11 @@ const selectedWiki = ref('');
 const wikis = ref([]);
 const loading = ref(true);
 const activeView = ref('graph');
+const globalSearch = ref(null);
+
+function handleSearchNavigate(key) {
+  router.push({ name: 'section', params: { key }, query: { wikiId: selectedWiki.value } });
+}
 
 const views = [
   { id: 'graph', label: 'Knowledge Graph', icon: 'graph' },
@@ -108,6 +114,14 @@ function onWikiChange() {
         </nav>
 
         <div class="header-right">
+          <button class="search-trigger" @click="globalSearch?.open()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="7" />
+              <path d="M21 21l-4.35-4.35" />
+            </svg>
+            <span>Search</span>
+            <kbd>⌘K</kbd>
+          </button>
           <select
             v-if="wikis.length > 1"
             v-model="selectedWiki"
@@ -120,6 +134,7 @@ function onWikiChange() {
             </option>
           </select>
         </div>
+        <GlobalSearch ref="globalSearch" :wiki-id="selectedWiki" @navigate="handleSearchNavigate" />
       </div>
     </header>
 
@@ -296,7 +311,41 @@ function onWikiChange() {
 }
 
 .header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   flex-shrink: 0;
+}
+
+.search-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.search-trigger:hover {
+  border-color: var(--accent-border);
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.search-trigger kbd {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 1px 5px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-elevated);
+  color: var(--text-muted);
 }
 
 .wiki-select {
