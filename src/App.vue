@@ -30,7 +30,6 @@ onMounted(async () => {
   try {
     const info = await wikiApi.getInfo();
     wikis.value = info.wikis || [];
-    if (wikis.value.length > 0) selectedWiki.value = wikis.value[0].wikiId;
   } catch (err) {
     console.error('Failed to load wiki info:', err);
   } finally {
