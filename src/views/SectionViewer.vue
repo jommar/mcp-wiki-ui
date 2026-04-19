@@ -9,6 +9,7 @@ const router = useRouter();
 
 const section = ref(null);
 const backlinks = ref([]);
+const connections = ref({ inbound: [], outbound: [] });
 const history = ref([]);
 const related = ref([]);
 const loading = ref(true);
@@ -166,9 +167,10 @@ watch(activeTab, async () => {
 async function loadSection() {
   loading.value = true;
   try {
-    const [sectionData, backlinksData, relatedData] = await Promise.all([
+    const [sectionData, backlinksData, connectionsData, relatedData] = await Promise.all([
       wikiApi.getSection(props.sectionKey, props.wikiId, contentOffset.value, contentLimit.value),
       wikiApi.getBacklinks(props.sectionKey, props.wikiId).catch(() => ({ backlinks: [] })),
+      wikiApi.getConnections(props.sectionKey, props.wikiId).catch(() => ({ inbound: [], outbound: [] })),
       wikiApi
         .getSection(props.sectionKey, props.wikiId)
         .then((r) => r.relatedSections || [])
@@ -176,6 +178,7 @@ async function loadSection() {
     ]);
     section.value = sectionData;
     backlinks.value = backlinksData.backlinks || [];
+    connections.value = { inbound: connectionsData.inbound || [], outbound: connectionsData.outbound || [] };
     related.value = relatedData;
 
     if (props.wikiId) {
@@ -266,7 +269,7 @@ function goBack() {
 
     <div class="viewer-tabs">
       <button
-        v-for="tab in ['content', 'backlinks', 'history', 'metadata']"
+        v-for="tab in ['content', 'connections', 'backlinks', 'history', 'metadata']"
         :key="tab"
         :class="['tab-btn', { active: activeTab === tab }]"
         @click="activeTab = tab"
@@ -284,7 +287,20 @@ function goBack() {
           <path d="M14 2v6h6" />
         </svg>
         <svg
-          v-else-if="tab === 'backlinks'"
+          v-else-if="tab === 'connections'"
+          viewBox="0 0 24 24"
+          width="14"
+          height="14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="3" />
+          <path d="M12 2v4M12 18v4M2 12h4M18 12h4" />
+          <path d="M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+        </svg>
+        <svg
+          v-else-if="tab === 'backlinks'""
           viewBox="0 0 24 24"
           width="14"
           height="14"
@@ -322,6 +338,7 @@ function goBack() {
           />
         </svg>
         {{ tab.charAt(0).toUpperCase() + tab.slice(1) }}
+        <span v-if="tab === 'connections'" class="tab-count">({{ connections.inbound.length + connections.outbound.length }})</span>
         <span v-if="tab === 'backlinks'" class="tab-count">({{ backlinks.length }})</span>
         <span v-if="tab === 'history'" class="tab-count">({{ history.length }})</span>
       </button>
@@ -364,6 +381,79 @@ function goBack() {
               <a href="#" @click.prevent="navigateTo(r.key)">{{ r.title }}</a>
             </li>
           </ul>
+        </div>
+      </div>
+
+      <div v-show="activeTab === 'connections'" class="connections-tab">
+        <div v-if="connections.inbound.length || connections.outbound.length" class="connections-grid">
+          <div class="connection-col">
+            <h4 class="tab-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+              </svg>
+              Inbound
+              <span class="tab-subtitle">Other pages that link here</span>
+            </h4>
+            <p v-if="!connections.inbound.length" class="empty-note">No sections link to this one</p>
+            <ul v-else class="link-list">
+              <li v-for="bl in connections.inbound" :key="bl.key" class="link-card">
+                <a href="#" @click.prevent="navigateTo(bl.key)">
+                  <div class="link-icon">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <path d="M14 2v6h6" />
+                    </svg>
+                  </div>
+                  <div class="link-info">
+                    <span class="link-title">{{ bl.title }}</span>
+                    <span class="link-parent">{{ bl.parent }}</span>
+                  </div>
+                  <svg class="link-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div class="connection-col">
+            <h4 class="tab-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+              </svg>
+              Outbound
+              <span class="tab-subtitle">Pages this page links to</span>
+            </h4>
+            <p v-if="!connections.outbound.length" class="empty-note">This section links to no other sections</p>
+            <ul v-else class="link-list">
+              <li v-for="bl in connections.outbound" :key="bl.key" class="link-card">
+                <a href="#" @click.prevent="navigateTo(bl.key)">
+                  <div class="link-icon">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <path d="M14 2v6h6" />
+                    </svg>
+                  </div>
+                  <div class="link-info">
+                    <span class="link-title">{{ bl.title }}</span>
+                    <span class="link-parent">{{ bl.parent }}</span>
+                  </div>
+                  <svg class="link-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div v-else class="empty-state">
+          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M8 15s1.5 2 4 2 4-2 4-2" />
+            <path d="M9 9h.01M15 9h.01" />
+          </svg>
+          <p>No connections</p>
         </div>
       </div>
 
@@ -746,6 +836,7 @@ function goBack() {
 
 .viewer-tabs {
   display: flex;
+  justify-content: center;
   padding: 0 20px;
   border-bottom: 1px solid var(--border-light);
   background: var(--bg-elevated);
@@ -791,7 +882,9 @@ function goBack() {
   line-height: 1.7;
   color: var(--text);
   font-size: 14px;
-  max-width: 800px;
+  max-width: 80vw;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
 .content-tab :deep(.markdown-body h1),
@@ -847,7 +940,7 @@ function goBack() {
 }
 
 .content-tab :deep(.markdown-body p) {
-  margin: 0 0 12px;
+  margin: 0 0 20px;
 }
 
 .content-tab :deep(.markdown-body ul),
@@ -1168,6 +1261,35 @@ function goBack() {
 .link-card:hover .link-arrow {
   color: var(--accent);
   transform: translateX(2px);
+}
+
+.connections-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.connection-col {
+  min-width: 0;
+}
+
+.connection-col .tab-title {
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.tab-subtitle {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-left: 6px;
+}
+
+.empty-note {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-style: italic;
+  padding: 8px 0;
 }
 
 .empty-state {

@@ -274,6 +274,58 @@ app.get('/api/wiki/backlinks/:key', async (req, res) => {
   }
 });
 
+app.get('/api/wiki/connections/:key', async (req, res) => {
+  try {
+    const { key } = req.params;
+    const { wikiId } = req.query;
+    let inboundWhere = 'WHERE sl.to_key = $1';
+    let outboundWhere = 'WHERE sl.from_key = $1';
+    const params = [key];
+    if (wikiId) {
+      inboundWhere += ' AND sl.to_wiki_id = $2';
+      outboundWhere += ' AND sl.from_wiki_id = $2';
+      params.push(wikiId);
+    }
+    // Inbound: sections that link TO this section
+    const inboundQuery = `
+      SELECT sl.from_key, sl.from_wiki_id, ws.title as title, ws.parent as parent
+      FROM section_links sl
+      JOIN wiki_sections ws ON ws.wiki_id = sl.from_wiki_id AND ws.key = sl.from_key
+      ${inboundWhere}
+      ORDER BY ws.title
+    `;
+    // Outbound: sections this section links TO
+    const outboundQuery = `
+      SELECT sl.to_key, sl.to_wiki_id, ws.title as title, ws.parent as parent
+      FROM section_links sl
+      JOIN wiki_sections ws ON ws.wiki_id = sl.to_wiki_id AND ws.key = sl.to_key
+      ${outboundWhere}
+      ORDER BY ws.title
+    `;
+    const [inboundRes, outboundRes] = await Promise.all([
+      pool.query(inboundQuery, params),
+      pool.query(outboundQuery, params),
+    ]);
+    res.json({
+      inbound: inboundRes.rows.map((r) => ({
+        key: r.from_key,
+        wikiId: r.from_wiki_id,
+        title: r.title,
+        parent: r.parent || 'Root',
+      })),
+      outbound: outboundRes.rows.map((r) => ({
+        key: r.to_key,
+        wikiId: r.to_wiki_id,
+        title: r.title,
+        parent: r.parent || 'Root',
+      })),
+      count: inboundRes.rows.length + outboundRes.rows.length,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/api/wiki/validate', async (req, res) => {
   try {
     const { wikiId } = req.query;
