@@ -1,11 +1,12 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { wikiApi } from '../api/wiki.js';
 import { marked } from 'marked';
 
 const props = defineProps({ sectionKey: String, wikiId: String });
 const router = useRouter();
+const route = useRoute();
 
 const section = ref(null);
 const backlinks = ref([]);
@@ -14,6 +15,7 @@ const history = ref([]);
 const related = ref([]);
 const loading = ref(true);
 const activeTab = ref('content');
+const validTabs = ['content', 'connections', 'backlinks', 'history', 'metadata'];
 const contentOffset = ref(0);
 const contentLimit = ref(8000);
 const historyLimit = ref(10);
@@ -147,18 +149,29 @@ const diffHtml = computed(() => {
 });
 
 onMounted(async () => {
+  // Initialize tab from URL query param
+  if (route.query.tab && validTabs.includes(route.query.tab)) {
+    activeTab.value = route.query.tab;
+  }
   await loadSection();
 });
 
 watch(
   () => props.sectionKey,
   async () => {
+    // Reset to content tab when navigating to a different section
+    activeTab.value = 'content';
     await loadSection();
   },
 );
 
-watch(activeTab, async () => {
-  if (activeTab.value === 'content') {
+watch(activeTab, async (newTab) => {
+  // Update URL with current tab
+  router.replace({
+    query: { ...route.query, tab: newTab === 'content' ? undefined : newTab },
+  });
+
+  if (newTab === 'content') {
     await nextTick();
     await renderMermaidDiagrams(contentContainer.value);
   }
@@ -204,10 +217,14 @@ function loadMoreContent() {
 }
 
 function navigateTo(key) {
+  const query = { ...route.query, wikiId: props.wikiId };
+  if (activeTab.value !== 'content') {
+    query.tab = activeTab.value;
+  }
   router.push({
     name: 'section',
     params: { sectionKey: key },
-    query: props.wikiId ? { wikiId: props.wikiId } : {},
+    query,
   });
 }
 

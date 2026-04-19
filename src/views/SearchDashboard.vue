@@ -75,6 +75,13 @@ function onKeydown(e) {
           Search Explorer
         </h2>
         <p class="header-desc">Find wiki sections by keyword or topic</p>
+        <div v-if="wikiId" class="wiki-indicator">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+          </svg>
+          <span class="wiki-id">{{ wikiId }}</span>
+        </div>
       </div>
       <div class="search-bar">
         <svg
@@ -225,6 +232,27 @@ function onKeydown(e) {
   font-size: 14px;
   color: var(--text-muted);
   margin: 0;
+}
+
+.wiki-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 4px 10px;
+  background: var(--accent-bg);
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--accent);
+}
+
+.wiki-indicator svg {
+  opacity: 0.7;
+}
+
+.wiki-id {
+  font-family: var(--mono);
+  font-weight: 600;
 }
 
 .search-bar {
