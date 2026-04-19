@@ -1,19 +1,19 @@
-// @ts-check
 import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { wikiApi } from '../api/wiki.js';
 
 /**
  * Composable for global search (Cmd+K palette)
- * @param {import('vue').Ref<string>} wikiId - Wiki ID to search in
- * @param {Function} onNavigate - Callback when a result is selected
+ * @param {string|function} wikiId - Wiki ID to search in
+ * @param {function} onNavigate - Callback when a result is selected
  */
 export function useGlobalSearch(wikiId, onNavigate) {
+  const inputRef = ref(null);
+
   const isOpen = ref(false);
   const query = ref('');
   const results = ref([]);
   const loading = ref(false);
   const selectedIdx = ref(0);
-  const inputRef = ref(null);
 
   function open() {
     isOpen.value = true;
