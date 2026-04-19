@@ -6,7 +6,7 @@ import { useNavigation } from './composables/useNavigation.js';
 import GlobalSearch from './components/GlobalSearch.vue';
 
 const router = useRouter();
-const { currentBreadcrumb, pushBreadcrumb, navigateTo } = useNavigation();
+const { pushBreadcrumb } = useNavigation();
 
 const selectedWiki = ref('');
 const wikis = ref([]);
@@ -143,31 +143,6 @@ function onWikiChange() {
         <GlobalSearch ref="globalSearch" :wiki-id="selectedWiki" @navigate="handleSearchNavigate" />
       </div>
     </header>
-
-    <div class="breadcrumb-bar">
-      <span v-for="(crumb, idx) in currentBreadcrumb" :key="idx" class="breadcrumb-item">
-        <span v-if="idx > 0" class="breadcrumb-sep">
-          <svg
-            viewBox="0 0 24 24"
-            width="14"
-            height="14"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M9 18l6-6-6-6" />
-          </svg>
-        </span>
-        <a
-          v-if="idx < currentBreadcrumb.length - 1"
-          href="#"
-          class="breadcrumb-link"
-          @click.prevent="navigateTo(idx)"
-          >{{ crumb }}</a
-        >
-        <span v-else class="breadcrumb-current">{{ crumb }}</span>
-      </span>
-    </div>
 
     <main class="app-main">
       <router-view v-if="!loading" :wiki-id="selectedWiki" />
@@ -368,54 +343,6 @@ function onWikiChange() {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-bg);
-}
-
-.breadcrumb-bar {
-  display: flex;
-  align-items: center;
-  padding: 10px 20px;
-  background: var(--bg-elevated);
-  border-bottom: 1px solid var(--border-light);
-  font-size: 13px;
-  flex-shrink: 0;
-}
-
-@media (prefers-color-scheme: dark) {
-  .breadcrumb-bar {
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border-bottom: 1px solid var(--glass-border);
-  }
-}
-
-.breadcrumb-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.breadcrumb-sep {
-  color: var(--text-muted);
-  display: flex;
-  align-items: center;
-}
-
-.breadcrumb-link {
-  color: var(--text-muted);
-  text-decoration: none;
-  font-weight: 500;
-  transition: var(--transition);
-}
-
-.breadcrumb-link:hover {
-  color: var(--accent);
-  text-decoration: none;
-}
-
-.breadcrumb-current {
-  color: var(--text-h);
-  font-weight: 600;
 }
 
 .app-main {
