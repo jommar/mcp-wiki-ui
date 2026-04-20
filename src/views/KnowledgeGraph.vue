@@ -29,6 +29,10 @@ const tooltipSnippet = ref('');
 const tooltipLoading = ref(false);
 let tooltipTimeout = null;
 
+// Edge direction colors
+const COLOR_OUTGOING = '#fbbf24'; // gold
+const COLOR_INCOMING = '#cbd5e1'; // silver
+
 // Focus mode state
 const focusMode = ref(false);
 const _focusedNodeId = ref(null);
@@ -556,16 +560,24 @@ function initGraph() {
   // --- Hover interactions: always light up connected edges ---
   nodeGroup.on('mouseover', (event, d) => {
     event.stopPropagation();
+    // Count incoming/outgoing for tooltip
+    let incoming = 0, outgoing = 0;
+    linkData.forEach((l) => {
+      const sid = typeof l.source === 'object' ? l.source.id : l.source;
+      const tid = typeof l.target === 'object' ? l.target.id : l.target;
+      if (sid === d.id) outgoing++;
+      if (tid === d.id) incoming++;
+    });
     // When a node is selected, keep its neighbors highlighted but show hovered node's tooltip
     if (selectedNode.value) {
       highlightNeighbors(selectedNode.value.id, adjacency);
       if (tooltipTimeout) clearTimeout(tooltipTimeout);
-      tooltipTimeout = setTimeout(() => showTooltip(event, d), 300);
+      tooltipTimeout = setTimeout(() => showTooltip(event, d, incoming, outgoing), 300);
       return;
     }
     highlightNeighbors(d.id, adjacency);
     if (tooltipTimeout) clearTimeout(tooltipTimeout);
-    tooltipTimeout = setTimeout(() => showTooltip(event, d), 300);
+    tooltipTimeout = setTimeout(() => showTooltip(event, d, incoming, outgoing), 300);
   });
 
   nodeGroup.on('mousemove', (event) => {
@@ -695,7 +707,7 @@ function highlightNeighbors(nodeId, adjacency) {
       return neighbors.has(d.id) ? 1 : 0.2;
     });
 
-  // Light up connected edges
+  // Light up connected edges — incoming vs outgoing
   d3.selectAll('.graph-link')
     .transition()
     .duration(200)
@@ -718,7 +730,9 @@ function highlightNeighbors(nodeId, adjacency) {
     .attr('stroke', (d) => {
       const sid = typeof d.source === 'object' ? d.source.id : d.source;
       const tid = typeof d.target === 'object' ? d.target.id : d.target;
-      return sid === nodeId || tid === nodeId ? '#818cf8' : 'var(--border)';
+      if (sid === nodeId) return COLOR_OUTGOING;
+      if (tid === nodeId) return COLOR_INCOMING;
+      return 'var(--border)';
     })
     .attr('stroke-width', (d) => {
       const sid = typeof d.source === 'object' ? d.source.id : d.source;
@@ -944,10 +958,10 @@ function applyLayout() {
 }
 
 // --- Tooltip ---
-async function showTooltip(event, d) {
+async function showTooltip(event, d, incoming = 0, outgoing = 0) {
   tooltipLoading.value = true;
   tooltipSnippet.value = '';
-  tooltip.value = { x: event.pageX, y: event.pageY, title: d.title, key: d.id };
+  tooltip.value = { x: event.pageX, y: event.pageY, title: d.title, key: d.id, incoming, outgoing };
 
   try {
     const data = await wikiApi.getSection(d.id, props.wikiId, 0, 150);
@@ -1373,6 +1387,20 @@ function updateMinimapViewport() {
           {{ tooltip.title }}
         </div>
         <code class="tooltip-key">{{ tooltip.key }}</code>
+        <div class="tooltip-links">
+          <span class="link-pill" :style="{ color: COLOR_OUTGOING, borderColor: COLOR_OUTGOING }">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M5 12h14M13 6l6 6-6 6"/>
+            </svg>
+            {{ tooltip.outgoing }}
+          </span>
+          <span class="link-pill" :style="{ color: COLOR_INCOMING, borderColor: COLOR_INCOMING }">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M19 12H5M11 6l-6 6 6 6"/>
+            </svg>
+            {{ tooltip.incoming }}
+          </span>
+        </div>
         <div v-if="tooltipLoading" class="tooltip-loading">
           <div class="tooltip-spinner" />
           <span>Loading preview...</span>
@@ -1894,6 +1922,26 @@ function updateMinimapViewport() {
   font-family: var(--mono);
   display: block;
   margin-bottom: 8px;
+}
+
+.tooltip-links {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  justify-content: flex-end;
+}
+
+.link-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--mono);
+  border: 1px solid;
+  border-radius: 999px;
+  background: transparent;
 }
 
 .tooltip-loading {
