@@ -3,7 +3,7 @@ import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import * as d3 from 'd3';
 import { wikiApi } from '../api/wiki.js';
-import CopyBacklinksButton from '../components/CopyBacklinksButton.vue';
+import CopyLinksButton from '../components/CopyLinksButton.vue';
 
 const props = defineProps({ wikiId: String });
 const router = useRouter();
@@ -1408,6 +1408,14 @@ function updateMinimapViewport() {
         <p v-else class="tooltip-snippet">
           {{ tooltipSnippet || 'No content available' }}
         </p>
+        <CopyLinksButton
+          :wiki-id="wikiId"
+          :section-key="tooltip.key"
+          :incoming="true"
+          :outgoing="true"
+          label="Copy"
+          class="tooltip-copy-btn"
+        />
       </div>
 
       <!-- Legend -->
@@ -1548,10 +1556,11 @@ function updateMinimapViewport() {
                 </svg>
                 Incoming Links ({{ backlinks.length }})
               </h4>
-              <CopyBacklinksButton
+              <CopyLinksButton
                 v-if="selectedNode"
                 :wiki-id="props.wikiId"
                 :section-key="selectedNode.id"
+                :incoming="true"
               />
             </div>
             <ul v-if="backlinks.length" class="backlink-list">
@@ -1968,6 +1977,12 @@ function updateMinimapViewport() {
   margin: 0;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.tooltip-copy-btn {
+  margin-top: 8px;
+  width: 100%;
+  justify-content: center;
 }
 
 /* Legend with glassmorphism */

@@ -6,6 +6,8 @@ const props = defineProps({
   wikiId: String,
   sectionKey: String,
   label: { type: String, default: '' },
+  incoming: { type: Boolean, default: false },
+  outgoing: { type: Boolean, default: false },
 });
 
 const loading = ref(false);
@@ -16,7 +18,10 @@ async function fetchAndCopy() {
   if (!props.sectionKey) return;
   loading.value = true;
   try {
-    const data = await wikiApi.getBacklinksContent(props.sectionKey, props.wikiId);
+    const data = await wikiApi.getLinksContent(props.sectionKey, props.wikiId, {
+      incoming: props.incoming,
+      outgoing: props.outgoing,
+    });
     const text = data.sections
       .map((s) => {
         // if content starts with # then return content, if not append s.title
@@ -35,7 +40,7 @@ async function fetchAndCopy() {
       copied.value = false;
     }, 2000);
   } catch (err) {
-    console.error('Failed to fetch or copy backlinks content:', err);
+    console.error('Failed to fetch or copy linked content:', err);
   } finally {
     loading.value = false;
   }
@@ -43,7 +48,7 @@ async function fetchAndCopy() {
 </script>
 
 <template>
-  <button class="copy-backlinks-btn" :disabled="loading" @click="fetchAndCopy">
+  <button class="copy-links-btn" :disabled="loading" @click="fetchAndCopy">
     <svg
       v-if="copied"
       viewBox="0 0 24 24"
@@ -85,7 +90,7 @@ async function fetchAndCopy() {
 </template>
 
 <style scoped>
-.copy-backlinks-btn {
+.copy-links-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -102,11 +107,11 @@ async function fetchAndCopy() {
     background 0.2s;
 }
 
-.copy-backlinks-btn:hover:not(:disabled) {
+.copy-links-btn:hover:not(:disabled) {
   opacity: 0.85;
 }
 
-.copy-backlinks-btn:disabled {
+.copy-links-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }

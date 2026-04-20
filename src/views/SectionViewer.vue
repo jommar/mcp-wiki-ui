@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { wikiApi } from '../api/wiki.js';
 import { marked } from 'marked';
+import CopyLinksButton from '../components/CopyLinksButton.vue';
 
 const props = defineProps({ sectionKey: String, wikiId: String });
 const router = useRouter();
@@ -286,6 +287,11 @@ function goBack() {
       </div>
       <div class="header-right">
         <span class="content-size">{{ section.totalLength?.toLocaleString() }} chars</span>
+        <CopyLinksButton
+          :wiki-id="wikiId"
+          :section-key="sectionKey"
+          label="Copy"
+        />
       </div>
     </div>
 
@@ -411,6 +417,15 @@ function goBack() {
       </div>
 
       <div v-show="activeTab === 'connections'" class="connections-tab">
+        <div class="connections-header">
+          <CopyLinksButton
+            :wiki-id="wikiId"
+            :section-key="sectionKey"
+            :incoming="true"
+            :outgoing="true"
+            label="Copy All Links"
+          />
+        </div>
         <div
           v-if="connections.inbound.length || connections.outbound.length"
           class="connections-grid"
@@ -542,20 +557,28 @@ function goBack() {
       </div>
 
       <div v-show="activeTab === 'backlinks'" class="backlinks-tab">
-        <h4 class="tab-title">
-          <svg
-            viewBox="0 0 24 24"
-            width="16"
-            height="16"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-          </svg>
-          Incoming Links ({{ backlinks.length }})
-        </h4>
+        <div class="backlinks-header">
+          <h4 class="tab-title">
+            <svg
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+            </svg>
+            Incoming Links ({{ backlinks.length }})
+          </h4>
+          <CopyLinksButton
+            :wiki-id="wikiId"
+            :section-key="sectionKey"
+            :incoming="true"
+            label="Copy Incoming"
+          />
+        </div>
         <ul v-if="backlinks.length" class="link-list">
           <li v-for="bl in backlinks" :key="bl.key" class="link-card">
             <a href="#" @click.prevent="navigateTo(bl.key)">
@@ -905,6 +928,9 @@ function goBack() {
 
 .header-right {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .content-size {
@@ -1351,6 +1377,23 @@ function goBack() {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
+}
+
+.connections-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.backlinks-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.backlinks-header .tab-title {
+  margin-bottom: 0;
 }
 
 .connection-col {

@@ -328,6 +328,94 @@ app.get('/api/wiki/backlinks-content/:key', async (req, res) => {
   }
 });
 
+app.get('/api/wiki/links-content/:key', async (req, res) => {
+  try {
+    const { key } = req.params;
+    const { wikiId, incoming, outgoing } = req.query;
+    const fetchIncoming = incoming !== 'false';
+    const fetchOutgoing = outgoing === 'true';
+
+    // When neither direction is requested, just return the section itself
+    if (!fetchIncoming && !fetchOutgoing) {
+      const { rows } = await pool.query(
+        'SELECT key, wiki_id, parent, title, content FROM wiki_sections WHERE key = $1' +
+          (wikiId ? ' AND wiki_id = $2' : ''),
+        wikiId ? [key, wikiId] : [key],
+      );
+      return res.json({
+        sections: rows.map((r) => ({
+          key: r.key,
+          wikiId: r.wiki_id,
+          title: r.title,
+          parent: r.parent || 'Root',
+          content: r.content,
+        })),
+        count: rows.length,
+      });
+    }
+
+    const params = [key];
+    let linkWhere = '';
+    if (fetchIncoming && fetchOutgoing) {
+      linkWhere = 'WHERE sl.to_key = $1 OR sl.from_key = $1';
+    } else if (fetchIncoming) {
+      linkWhere = 'WHERE sl.to_key = $1';
+    } else {
+      linkWhere = 'WHERE sl.from_key = $1';
+    }
+    if (wikiId) {
+      const wikiParam = params.length + 1;
+      if (fetchIncoming && fetchOutgoing) {
+        linkWhere += ` AND (sl.to_wiki_id = $${wikiParam} OR sl.from_wiki_id = $${wikiParam})`;
+      } else if (fetchIncoming) {
+        linkWhere += ` AND sl.to_wiki_id = $${wikiParam}`;
+      } else {
+        linkWhere += ` AND sl.from_wiki_id = $${wikiParam}`;
+      }
+      params.push(wikiId);
+    }
+
+    // Fetch the selected section + all linked sections in one query
+    const query = `
+      SELECT DISTINCT ws.key, ws.wiki_id, ws.parent, ws.title, ws.content
+      FROM wiki_sections ws
+      WHERE ws.key = $1${wikiId ? ' AND ws.wiki_id = $2' : ''}
+      UNION
+      SELECT DISTINCT ws.key, ws.wiki_id, ws.parent, ws.title, ws.content
+      FROM section_links sl
+      JOIN wiki_sections ws ON (
+        ${fetchIncoming && fetchOutgoing
+          ? '(sl.to_key = $1 AND ws.key = sl.from_key AND ws.wiki_id = sl.from_wiki_id) OR (sl.from_key = $1 AND ws.key = sl.to_key AND ws.wiki_id = sl.to_wiki_id)'
+          : fetchIncoming
+            ? 'sl.to_key = $1 AND ws.key = sl.from_key AND ws.wiki_id = sl.from_wiki_id'
+            : 'sl.from_key = $1 AND ws.key = sl.to_key AND ws.wiki_id = sl.to_wiki_id'}
+      )
+      ${linkWhere}
+    `;
+    const { rows: contentRows } = await pool.query(query, params);
+
+    // Put the selected section first, then the rest alphabetically
+    contentRows.sort((a, b) => {
+      if (a.key === key) return -1;
+      if (b.key === key) return 1;
+      return a.title.localeCompare(b.title);
+    });
+
+    res.json({
+      sections: contentRows.map((r) => ({
+        key: r.key,
+        wikiId: r.wiki_id,
+        title: r.title,
+        parent: r.parent || 'Root',
+        content: r.content,
+      })),
+      count: contentRows.length,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/api/wiki/connections/:key', async (req, res) => {
   try {
     const { key } = req.params;
