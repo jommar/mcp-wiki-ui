@@ -6,9 +6,10 @@ Enterprise-grade knowledge graph visualization and wiki management interface. A 
 
 Wiki-UI provides a comprehensive suite of tools for navigating and understanding wiki content through multiple visualization paradigms:
 
-- **Knowledge Graph** — Interactive force-directed graph with clustering, focus mode, and animated mind-map background
-- **Section Viewer** — Markdown rendering with syntax highlighting and Mermaid diagram support
-- **Search Dashboard** — Full-text search with result ranking and filtering
+- **Knowledge Graph** — Interactive force-directed graph with clustering, focus mode, direction-colored edges, and animated mind-map background
+- **Section Viewer** — Markdown rendering with syntax highlighting, Mermaid diagram support, and bidirectional connections tab
+- **Search Dashboard** — Full-text search with result ranking, filtering, and wiki ID indicator
+- **Global Search** — App-wide search accessible via Cmd/Ctrl+K from any page
 - **Topic Tree** — Hierarchical topic exploration
 - **Health Report** — Wiki integrity analysis (empty sections, orphaned pages, broken links)
 - **Stats Dashboard** — Analytics and metrics for wiki content
@@ -100,7 +101,9 @@ wiki-ui/
 - Focus mode for isolating connected subgraphs
 - Animated concentric circle background layers
 - Minimap for viewport navigation
-- Command palette (Cmd/Ctrl+K) for quick navigation
+- Direction-colored edges (gold = outgoing, silver = incoming)
+- Link count badges in hover tooltip (incoming/outgoing)
+- CopyLinksButton in tooltip and detail panel for copying linked content
 - Parent-based color coding with high-contrast palette
 - Text and topic filtering with filter-aware highlights
 - Drag-and-drop node repositioning
@@ -111,13 +114,18 @@ wiki-ui/
 - Markdown rendering with syntax highlighting
 - Mermaid diagram rendering
 - Section navigation with backlinks
+- Connections tab showing inbound/outbound links
 - Content diff visualization
+- CopyLinksButton for copying linked section content (configurable direction)
+- Tab state synced to URL (`?tab=`) for shareable links
 
 ### Search
 
 - Full-text search across all wiki sections
 - Result ranking and snippet extraction
 - Filter by topic/parent
+- Global search component accessible via Cmd/Ctrl+K from anywhere in the app
+- Wiki ID indicator in search dashboard
 
 ### Health Report
 
@@ -129,14 +137,16 @@ wiki-ui/
 
 The Express server provides the following endpoints:
 
-| Method | Endpoint              | Description                 |
-| ------ | --------------------- | --------------------------- |
-| `GET`  | `/api/sections`       | List all wiki sections      |
-| `GET`  | `/api/sections/:key`  | Get section content         |
-| `GET`  | `/api/backlinks/:key` | Get backlinks for a section |
-| `GET`  | `/api/search?q=`      | Full-text search            |
-| `GET`  | `/api/stats`          | Wiki statistics             |
-| `GET`  | `/api/health`         | Wiki health report          |
+| Method | Endpoint                    | Description                                    |
+| ------ | --------------------------- | ---------------------------------------------- |
+| `GET`  | `/api/sections`             | List all wiki sections                         |
+| `GET`  | `/api/sections/:key`        | Get section content                            |
+| `GET`  | `/api/backlinks/:key`       | Get backlinks for a section                    |
+| `GET`  | `/api/search?q=`            | Full-text search                               |
+| `GET`  | `/api/stats`                | Wiki statistics                                |
+| `GET`  | `/api/health`               | Wiki health report                             |
+| `GET`  | `/api/wiki/connections`     | Get inbound and outbound links for a section   |
+| `GET`  | `/api/wiki/links-content`   | Get content for linked sections (by direction) |
 
 ## License
 

@@ -18,10 +18,10 @@ This is **wiki-ui** — a Vue 3 + Vite application with an Express backend for w
 ```
 src/
 ├── api/             # Frontend API client (wikiApi)
-├── components/      # Reusable Vue components
-├── composables/     # Vue composition functions
+├── components/      # Reusable Vue components (GlobalSearch, CopyLinksButton, etc.)
+├── composables/     # Vue composition functions (useGlobalSearch, etc.)
 ├── router/          # Vue Router config
-├── views/           # Page components (KnowledgeGraph, SectionViewer, etc.)
+├── views/           # Page components (KnowledgeGraph, SectionViewer, SearchDashboard, etc.)
 ├── App.vue          # Root component
 ├── main.js          # Entry point
 └── style.css        # Global styles + CSS variables
@@ -73,11 +73,24 @@ src/
 
 ### Interactions
 
-- Hover: highlights connected nodes/edges, shows tooltip
+- Hover: highlights connected nodes/edges, shows tooltip with link count badges
 - Click: selects node, opens detail panel, keeps neighbors highlighted
 - Background click: clears selection, resets highlights
 - Drag: repositions nodes in force simulation
 - Zoom: mouse wheel / trackpad pinch
+
+### Edge Coloring
+
+- Outgoing edges: gold color on hover
+- Incoming edges: silver color on hover
+- Tooltip shows pill badges with arrow icons for incoming/outgoing counts
+
+### CopyLinksButton
+
+- Reusable component for copying linked section content
+- Props: `incoming` (boolean), `outgoing` (boolean) — both default false
+- When neither direction specified, copies the section itself
+- Used in KnowledgeGraph tooltip/detail panel and SectionViewer (content header, connections tab, backlinks tab)
 
 ### Filter Awareness
 
