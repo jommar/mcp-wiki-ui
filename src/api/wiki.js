@@ -24,6 +24,8 @@ export const wikiApi = {
   getSectionsBatch: (keys, wikiId) =>
     fetchApi('/wiki/sections/batch', { keys: keys.join(','), wikiId }),
   getBacklinks: (key, wikiId) => fetchApi(`/wiki/backlinks/${encodeURIComponent(key)}`, { wikiId }),
+  getBacklinksContent: (key, wikiId) =>
+    fetchApi(`/wiki/backlinks-content/${encodeURIComponent(key)}`, { wikiId }),
   getConnections: (key, wikiId) =>
     fetchApi(`/wiki/connections/${encodeURIComponent(key)}`, { wikiId }),
   validate: (wikiId) => fetchApi('/wiki/validate', { wikiId }),

@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import * as d3 from 'd3';
 import { wikiApi } from '../api/wiki.js';
+import CopyBacklinksButton from '../components/CopyBacklinksButton.vue';
 
 const props = defineProps({ wikiId: String });
 const router = useRouter();
@@ -1504,20 +1505,27 @@ function updateMinimapViewport() {
           </button>
 
           <div class="backlinks-section">
-            <h4>
-              <svg
-                viewBox="0 0 24 24"
-                width="14"
-                height="14"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-              </svg>
-              Incoming Links ({{ backlinks.length }})
-            </h4>
+            <div class="backlinks-header">
+              <h4>
+                <svg
+                  viewBox="0 0 24 24"
+                  width="14"
+                  height="14"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                </svg>
+                Incoming Links ({{ backlinks.length }})
+              </h4>
+              <CopyBacklinksButton
+                v-if="selectedNode"
+                :wiki-id="props.wikiId"
+                :section-key="selectedNode.id"
+              />
+            </div>
             <ul v-if="backlinks.length" class="backlink-list">
               <li v-for="bl in backlinks" :key="bl.key" class="backlink-item">
                 <a href="#" @click.prevent="navigateToSection(bl.key)">
@@ -2223,12 +2231,19 @@ function updateMinimapViewport() {
   font-size: 12px;
   font-weight: 600;
   color: var(--text-h);
-  margin: 0 0 10px;
+  margin: 0;
   display: flex;
   align-items: center;
   gap: 6px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.backlinks-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
 }
 
 .backlink-list {

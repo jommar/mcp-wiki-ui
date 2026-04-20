@@ -274,6 +274,60 @@ app.get('/api/wiki/backlinks/:key', async (req, res) => {
   }
 });
 
+app.get('/api/wiki/backlinks-content/:key', async (req, res) => {
+  try {
+    const { key } = req.params;
+    const { wikiId } = req.query;
+    const params = [key];
+    let whereClause = 'WHERE sl.to_key = $1';
+    if (wikiId) {
+      whereClause += ' AND sl.to_wiki_id = $2';
+      params.push(wikiId);
+    }
+
+    // Get backlink keys
+    const backlinksQuery = `
+      SELECT sl.from_key, sl.from_wiki_id
+      FROM section_links sl
+      ${whereClause}
+    `;
+    const { rows: backlinkRows } = await pool.query(backlinksQuery, params);
+
+    // Collect all keys (selected section + backlinks)
+    const allKeys = [key, ...backlinkRows.map((r) => r.from_key)];
+    const allWikiIds = wikiId
+      ? [wikiId, ...backlinkRows.map((r) => r.from_wiki_id)]
+      : null;
+
+    // Fetch content for all sections
+    const contentParams = [allKeys];
+    let contentWhere = 'WHERE key = ANY($1)';
+    if (wikiId) {
+      contentWhere += ' AND wiki_id = $2';
+      contentParams.push(wikiId);
+    }
+    const { rows: contentRows } = await pool.query(
+      `SELECT key, wiki_id, parent, title, content
+       FROM wiki_sections ${contentWhere}
+       ORDER BY array_position($1, key)`,
+      contentParams,
+    );
+
+    res.json({
+      sections: contentRows.map((r) => ({
+        key: r.key,
+        wikiId: r.wiki_id,
+        title: r.title,
+        parent: r.parent || 'Root',
+        content: r.content,
+      })),
+      count: contentRows.length,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/api/wiki/connections/:key', async (req, res) => {
   try {
     const { key } = req.params;
