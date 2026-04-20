@@ -15,7 +15,7 @@ const activeView = ref('graph');
 const globalSearch = ref(null);
 
 function handleSearchNavigate(key) {
-  router.push({ name: 'section', params: { key }, query: { wikiId: selectedWiki.value } });
+  router.push({ name: 'section', params: { sectionKey: key }, query: { wikiId: selectedWiki.value } });
 }
 
 const views = [
