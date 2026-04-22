@@ -53,7 +53,7 @@ src/
 ### Naming
 
 - Components: PascalCase (`KnowledgeGraph.vue`)
-- Composables: camelCase with `use` prefix (`useWikiApi.js`)
+- Composables: camelCase with `use` prefix (`useWikiApi.js`, `usePinnedSections.js`)
 - Variables/Functions: camelCase
 - CSS Classes: kebab-case
 
@@ -91,6 +91,14 @@ src/
 - Props: `incoming` (boolean), `outgoing` (boolean) — both default false
 - When neither direction specified, copies the section itself
 - Used in KnowledgeGraph tooltip/detail panel and SectionViewer (content header, connections tab, backlinks tab)
+
+### PinButton / PinnedSectionsPanel / usePinnedSections
+
+- `PinButton` — star toggle in the SectionViewer header; filled when the section is pinned
+- `PinnedSectionsPanel` — dropdown in the app header listing all pinned sections; emits `navigate` event (handled by App.vue which also syncs `selectedWiki`)
+- `usePinnedSections` composable — module-level singleton `ref` so all components share reactive pin state without Pinia; persists to `localStorage` under `wiki-pinned-sections`
+- Each pin stores `{ key, wikiId, title, pinnedAt }`
+- Navigation from pins calls `handlePinNavigate` in App.vue which updates `selectedWiki` before pushing the route — this ensures SectionViewer receives the correct `wikiId` prop
 
 ### ConnectedSectionsButton
 

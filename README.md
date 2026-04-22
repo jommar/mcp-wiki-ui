@@ -10,6 +10,7 @@ Wiki-UI provides a comprehensive suite of tools for navigating and understanding
 - **Section Viewer** — Markdown rendering with syntax highlighting, Mermaid diagram support, and bidirectional connections tab
 - **Search Dashboard** — Full-text search with result ranking, filtering, and wiki ID indicator
 - **Global Search** — App-wide search accessible via Cmd/Ctrl+K from any page
+- **Pinned Sections** — Bookmark any section for quick access from the header; persisted in localStorage
 - **Topic Tree** — Hierarchical topic exploration
 - **Health Report** — Wiki integrity analysis (empty sections, orphaned pages, broken links)
 - **Stats Dashboard** — Analytics and metrics for wiki content
@@ -119,6 +120,15 @@ wiki-ui/
 - CopyLinksButton for copying linked section content (configurable direction)
 - ConnectedSectionsButton — auto-opens on load, shows all incoming/outgoing sections in a single scrollable modal with direction badges (silver/gold), per-section copy, and copy-all
 - Tab state synced to URL (`?tab=`) for shareable links
+- PinButton in section header to pin/unpin the current section
+
+### Pinned Sections
+
+- Star button in the Section Viewer header toggles a pin on the current section
+- Pinned sections panel in the app header lists all bookmarked sections
+- Clicking a pinned item navigates directly to that section and syncs the wiki selector
+- Remove individual pins via the × button (visible on hover)
+- State persisted in `localStorage` under `wiki-pinned-sections`
 
 ### Search
 
