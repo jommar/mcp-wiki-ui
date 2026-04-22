@@ -5,6 +5,7 @@ import { wikiApi } from '../api/wiki.js';
 import { marked } from 'marked';
 import CopyLinksButton from '../components/CopyLinksButton.vue';
 import ConnectedSectionsButton from '../components/ConnectedSectionsButton.vue';
+import PinButton from '../components/PinButton.vue';
 
 const props = defineProps({ sectionKey: String, wikiId: String });
 const router = useRouter();
@@ -288,6 +289,7 @@ function goBack() {
       </div>
       <div class="header-right">
         <span class="content-size">{{ section.totalLength?.toLocaleString() }} chars</span>
+        <PinButton :section-key="sectionKey" :wiki-id="wikiId" :title="section.title" />
         <ConnectedSectionsButton :wiki-id="wikiId" :section-key="sectionKey" :auto-open="true" />
         <CopyLinksButton
           :wiki-id="wikiId"

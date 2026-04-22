@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { wikiApi } from './api/wiki.js';
 import { useNavigation } from './composables/useNavigation.js';
 import GlobalSearch from './components/GlobalSearch.vue';
+import PinnedSectionsPanel from './components/PinnedSectionsPanel.vue';
 
 const router = useRouter();
 const { pushBreadcrumb } = useNavigation();
@@ -16,6 +17,11 @@ const globalSearch = ref(null);
 
 function handleSearchNavigate(key) {
   router.push({ name: 'section', params: { sectionKey: key }, query: { wikiId: selectedWiki.value } });
+}
+
+function handlePinNavigate({ key, wikiId }) {
+  if (wikiId) selectedWiki.value = wikiId;
+  router.push({ name: 'section', params: { sectionKey: key }, query: { wikiId: wikiId || undefined } });
 }
 
 const views = [
@@ -113,6 +119,7 @@ function onWikiChange() {
         </nav>
 
         <div class="header-right">
+          <PinnedSectionsPanel :wiki-id="selectedWiki" @navigate="handlePinNavigate" />
           <button class="search-trigger" @click="globalSearch?.open()">
             <svg
               viewBox="0 0 24 24"
