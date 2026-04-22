@@ -5,6 +5,7 @@ import { wikiApi } from '../api/wiki.js';
 const props = defineProps({
   wikiId: String,
   sectionKey: String,
+  keys: { type: Array, default: null },
   label: { type: String, default: '' },
   incoming: { type: Boolean, default: false },
   outgoing: { type: Boolean, default: false },
@@ -15,15 +16,21 @@ const copied = ref(false);
 let copiedTimeout = null;
 
 async function fetchAndCopy() {
-  if (!props.sectionKey) return;
   loading.value = true;
   try {
-    const data = await wikiApi.getLinksContent(props.sectionKey, props.wikiId, {
-      incoming: props.incoming,
-      outgoing: props.outgoing,
-    });
+    let sections = [];
+    if (props.keys && props.keys.length > 0) {
+      const data = await wikiApi.getSectionsBatch(props.keys, props.wikiId);
+      sections = data.sections || [];
+    } else if (props.sectionKey) {
+      const data = await wikiApi.getLinksContent(props.sectionKey, props.wikiId, {
+        incoming: props.incoming,
+        outgoing: props.outgoing,
+      });
+      sections = data.sections || [];
+    }
     const seen = new Set();
-    const text = data.sections
+    const text = sections
       .reduce((acc, s) => {
         if (seen.has(s.key)) return acc;
         seen.add(s.key);

@@ -88,9 +88,11 @@ src/
 ### CopyLinksButton
 
 - Reusable component for copying linked section content
-- Props: `incoming` (boolean), `outgoing` (boolean) — both default false
-- When neither direction specified, copies the section itself
-- Used in KnowledgeGraph tooltip/detail panel and SectionViewer (content header, connections tab, backlinks tab)
+- Props: `wikiId`, `sectionKey`, `keys` (array), `incoming` (boolean), `outgoing` (boolean), `label` (string) — `incoming`/`outgoing` default false
+- **`keys` mode**: when `keys` array is provided, fetches those sections directly via `getSectionsBatch` and copies their content
+- **`sectionKey` mode**: when only `sectionKey` is provided, fetches linked sections via `getLinksContent` (respects `incoming`/`outgoing` direction flags)
+- When neither direction specified and no `keys`, copies the section itself
+- Used in KnowledgeGraph tooltip/detail panel, SectionViewer (content header, connections tab, backlinks tab), and ConnectedSectionsButton modal header
 
 ### PinButton / PinnedSectionsPanel / usePinnedSections
 
@@ -102,10 +104,12 @@ src/
 
 ### ConnectedSectionsButton
 
-- Button + teleported modal that loads and displays all connected section content
+- Button + teleported modal that loads and displays section content
+- Props: `wikiId`, `sectionKey`, `keys` (array), `autoOpen` (boolean, default false)
+- **`keys` mode**: when `keys` array is provided, fetches those sections directly via `getSectionsBatch` and displays their content (no direction badges). Used by TopicTree to show all currently filtered sections.
+- **`sectionKey` mode**: when only `sectionKey` is provided, fetches incoming/outgoing links via `getLinksContent`, merges into one list with direction badges.
 - Auto-opens on mount when `autoOpen` prop is true (set in SectionViewer)
-- Fetches incoming and outgoing via `getLinksContent` in parallel, merges into one list
-- Direction badge per card: silver = incoming, gold = outgoing (matching KnowledgeGraph edge colors)
+- Direction badge per card: silver = incoming, gold = outgoing (matching KnowledgeGraph edge colors); hidden in `keys` mode
 - Per-section copy button (copies content from memory, no extra API call) and copy-all via CopyLinksButton in modal header
 
 ### Filter Awareness

@@ -8,7 +8,9 @@ import CopyLinksButton from './CopyLinksButton.vue';
 const props = defineProps({
   wikiId: String,
   sectionKey: String,
+  keys: { type: Array, default: null },
   autoOpen: { type: Boolean, default: false },
+  label: { type: String, default: 'View Connections' },
 });
 
 onMounted(() => {
@@ -47,17 +49,24 @@ async function openModal() {
   loading.value = true;
   sections.value = [];
   try {
-    const [inData, outData] = await Promise.all([
-      wikiApi.getLinksContent(props.sectionKey, props.wikiId, { incoming: true, outgoing: false }),
-      wikiApi.getLinksContent(props.sectionKey, props.wikiId, { incoming: false, outgoing: true }),
-    ]);
-    const map = new Map();
-    for (const s of inData.sections || []) map.set(s.key, { ...s, direction: 'incoming' });
-    for (const s of outData.sections || []) {
-      if (map.has(s.key)) map.get(s.key).direction = 'both';
-      else map.set(s.key, { ...s, direction: 'outgoing' });
+    if (props.keys && props.keys.length > 0) {
+      // Fetch sections directly by key
+      const data = await wikiApi.getSectionsBatch(props.keys, props.wikiId);
+      sections.value = (data.sections || []).map((s) => ({ ...s, direction: null }));
+    } else {
+      // Fetch incoming/outgoing connections
+      const [inData, outData] = await Promise.all([
+        wikiApi.getLinksContent(props.sectionKey, props.wikiId, { incoming: true, outgoing: false }),
+        wikiApi.getLinksContent(props.sectionKey, props.wikiId, { incoming: false, outgoing: true }),
+      ]);
+      const map = new Map();
+      for (const s of inData.sections || []) map.set(s.key, { ...s, direction: 'incoming' });
+      for (const s of outData.sections || []) {
+        if (map.has(s.key)) map.get(s.key).direction = 'both';
+        else map.set(s.key, { ...s, direction: 'outgoing' });
+      }
+      sections.value = [...map.values()];
     }
-    sections.value = [...map.values()];
   } catch (err) {
     console.error('Failed to load connected sections:', err);
   } finally {
@@ -99,7 +108,7 @@ function onOverlayKeydown(e) {
         d="M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"
       />
     </svg>
-    View Connections
+    {{ label }}
   </button>
 
   <Teleport to="body">
@@ -117,6 +126,7 @@ function onOverlayKeydown(e) {
             <CopyLinksButton
               :wiki-id="wikiId"
               :section-key="sectionKey"
+              :keys="keys"
               :incoming="true"
               :outgoing="true"
               label="Copy All"
@@ -183,7 +193,7 @@ function onOverlayKeydown(e) {
                       <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                     </svg>
                   </button>
-                  <span :class="['direction-badge', section.direction]">
+                  <span v-if="section.direction" :class="['direction-badge', section.direction]">
                     <template v-if="section.direction === 'both'">
                       <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5">
                         <path d="M12 19V5M5 12l7-7 7 7" />

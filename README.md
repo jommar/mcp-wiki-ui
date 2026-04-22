@@ -117,8 +117,8 @@ wiki-ui/
 - Section navigation with backlinks
 - Connections tab showing inbound/outbound links
 - Content diff visualization
-- CopyLinksButton for copying linked section content (configurable direction)
-- ConnectedSectionsButton — auto-opens on load, shows all incoming/outgoing sections in a single scrollable modal with direction badges (silver/gold), per-section copy, and copy-all
+- CopyLinksButton for copying linked section content (configurable direction; supports `keys` array prop to fetch and copy arbitrary sections directly)
+- ConnectedSectionsButton — auto-opens on load, shows all incoming/outgoing sections in a single scrollable modal with direction badges (silver/gold), per-section copy, and copy-all; supports `keys` array prop to display arbitrary sections (e.g., TopicTree filtered view) without direction badges
 - Tab state synced to URL (`?tab=`) for shareable links
 - PinButton in section header to pin/unpin the current section
 
@@ -137,6 +137,13 @@ wiki-ui/
 - Filter by topic/parent
 - Global search component accessible via Cmd/Ctrl+K from anywhere in the app
 - Wiki ID indicator in search dashboard
+
+### Topic Tree
+
+- Hierarchical topic exploration with expand/collapse groups
+- Real-time text filter across section titles and keys
+- "View Connections" button to open a modal showing all currently filtered sections' content
+- Copy-all functionality via CopyLinksButton in the modal header
 
 ### Health Report
 

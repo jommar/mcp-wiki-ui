@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { wikiApi } from '../api/wiki.js';
+import ConnectedSectionsButton from '../components/ConnectedSectionsButton.vue';
 
 const props = defineProps({ wikiId: String });
 const router = useRouter();
@@ -23,6 +24,10 @@ const filteredGroups = computed(() => {
     }))
     .filter((g) => g.sections.length > 0);
 });
+
+const filteredKeys = computed(() =>
+  filteredGroups.value.flatMap((g) => g.sections.map((s) => s.key)),
+);
 
 onMounted(async () => {
   await loadData();
@@ -148,6 +153,14 @@ function getDepthClass(depth) {
           </svg>
           Collapse
         </button>
+        <div class="preview-btn-wrapper">
+          <ConnectedSectionsButton
+            v-if="filteredKeys.length > 0"
+            :wiki-id="wikiId"
+            :keys="filteredKeys"
+            label="Preview Sections"
+          />
+        </div>
       </div>
     </div>
 
@@ -517,5 +530,24 @@ function getDepthClass(depth) {
 .expand-leave-from {
   opacity: 1;
   max-height: 2000px;
+}
+
+/* ConnectedSectionsButton inside tree controls */
+.preview-btn-wrapper {
+  margin-left: auto;
+}
+
+.preview-btn-wrapper :deep(.view-connections-btn) {
+  padding: 8px 12px;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.preview-btn-wrapper :deep(.view-connections-btn:hover) {
+  opacity: 0.85;
 }
 </style>
