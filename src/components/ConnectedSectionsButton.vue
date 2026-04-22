@@ -51,9 +51,13 @@ async function openModal() {
       wikiApi.getLinksContent(props.sectionKey, props.wikiId, { incoming: true, outgoing: false }),
       wikiApi.getLinksContent(props.sectionKey, props.wikiId, { incoming: false, outgoing: true }),
     ]);
-    const inSections = (inData.sections || []).map((s) => ({ ...s, direction: 'incoming' }));
-    const outSections = (outData.sections || []).map((s) => ({ ...s, direction: 'outgoing' }));
-    sections.value = [...inSections, ...outSections];
+    const map = new Map();
+    for (const s of inData.sections || []) map.set(s.key, { ...s, direction: 'incoming' });
+    for (const s of outData.sections || []) {
+      if (map.has(s.key)) map.get(s.key).direction = 'both';
+      else map.set(s.key, { ...s, direction: 'outgoing' });
+    }
+    sections.value = [...map.values()];
   } catch (err) {
     console.error('Failed to load connected sections:', err);
   } finally {
@@ -180,25 +184,23 @@ function onOverlayKeydown(e) {
                     </svg>
                   </button>
                   <span :class="['direction-badge', section.direction]">
+                    <template v-if="section.direction === 'both'">
+                      <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M12 19V5M5 12l7-7 7 7" />
+                      </svg>
+                      <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M12 5v14M5 12l7 7 7-7" />
+                      </svg>
+                    </template>
                     <svg
-                      v-if="section.direction === 'incoming'"
-                      viewBox="0 0 24 24"
-                      width="11"
-                      height="11"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.5"
+                      v-else-if="section.direction === 'incoming'"
+                      viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"
                     >
                       <path d="M12 19V5M5 12l7-7 7 7" />
                     </svg>
                     <svg
                       v-else
-                      viewBox="0 0 24 24"
-                      width="11"
-                      height="11"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.5"
+                      viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"
                     >
                       <path d="M12 5v14M5 12l7 7 7-7" />
                     </svg>
@@ -414,6 +416,11 @@ function onOverlayKeydown(e) {
 .direction-badge.outgoing {
   background: color-mix(in srgb, #fbbf24 35%, transparent);
   color: #d97706;
+}
+
+.direction-badge.both {
+  background: color-mix(in srgb, #fbbf24 20%, color-mix(in srgb, #cbd5e1 20%, transparent));
+  color: var(--text-muted);
 }
 
 .section-card-meta {

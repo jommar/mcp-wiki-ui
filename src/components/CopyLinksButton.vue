@@ -22,16 +22,14 @@ async function fetchAndCopy() {
       incoming: props.incoming,
       outgoing: props.outgoing,
     });
+    const seen = new Set();
     const text = data.sections
-      .map((s) => {
-        // if content starts with # then return content, if not append s.title
-        if (s.content.startsWith('#')) {
-          return s.content;
-        } else {
-          return `# ${s.title}\n\n${s.content}`;
-        }
-      })
-      .filter(Boolean)
+      .reduce((acc, s) => {
+        if (seen.has(s.key)) return acc;
+        seen.add(s.key);
+        acc.push(s.content.startsWith('#') ? s.content : `# ${s.title}\n\n${s.content}`);
+        return acc;
+      }, [])
       .join('\n\n');
     await navigator.clipboard.writeText(text);
     copied.value = true;
