@@ -18,7 +18,7 @@ This is **wiki-ui** — a Vue 3 + Vite application with an Express backend for w
 ```
 src/
 ├── api/             # Frontend API client (wikiApi)
-├── components/      # Reusable Vue components (GlobalSearch, CopyLinksButton, etc.)
+├── components/      # Reusable Vue components (GlobalSearch, CopyLinksButton, ConnectedSectionsButton, etc.)
 ├── composables/     # Vue composition functions (useGlobalSearch, etc.)
 ├── router/          # Vue Router config
 ├── views/           # Page components (KnowledgeGraph, SectionViewer, SearchDashboard, etc.)
@@ -91,6 +91,14 @@ src/
 - Props: `incoming` (boolean), `outgoing` (boolean) — both default false
 - When neither direction specified, copies the section itself
 - Used in KnowledgeGraph tooltip/detail panel and SectionViewer (content header, connections tab, backlinks tab)
+
+### ConnectedSectionsButton
+
+- Button + teleported modal that loads and displays all connected section content
+- Auto-opens on mount when `autoOpen` prop is true (set in SectionViewer)
+- Fetches incoming and outgoing via `getLinksContent` in parallel, merges into one list
+- Direction badge per card: silver = incoming, gold = outgoing (matching KnowledgeGraph edge colors)
+- Per-section copy button (copies content from memory, no extra API call) and copy-all via CopyLinksButton in modal header
 
 ### Filter Awareness
 

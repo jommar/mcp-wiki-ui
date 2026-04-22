@@ -117,6 +117,7 @@ wiki-ui/
 - Connections tab showing inbound/outbound links
 - Content diff visualization
 - CopyLinksButton for copying linked section content (configurable direction)
+- ConnectedSectionsButton — auto-opens on load, shows all incoming/outgoing sections in a single scrollable modal with direction badges (silver/gold), per-section copy, and copy-all
 - Tab state synced to URL (`?tab=`) for shareable links
 
 ### Search
