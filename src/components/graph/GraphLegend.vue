@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue';
+import { ChevronDown, X } from 'lucide-vue-next';
 
 const props = defineProps({
   colors: { type: Object, default: () => ({}) },
@@ -18,16 +19,14 @@ const collapsed = ref(false);
         class="flex items-center gap-2 w-full px-3 py-2 text-[12px] font-semibold text-heading hover:bg-accent/10 transition-colors"
         @click="collapsed = !collapsed"
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5 transition-transform duration-200"
-             :class="collapsed ? '-rotate-90' : ''">
-          <path d="M6 9l6 6 6-6" />
-        </svg>
+        <ChevronDown class="w-3.5 h-3.5 transition-transform duration-200"
+             :class="collapsed ? '-rotate-90' : ''" />
         {{ collapsed ? 'Legend' : 'Topic Colors' }}
       </button>
       <button v-if="selected.size > 0"
               class="w-7 h-7 flex items-center justify-center text-danger hover:bg-danger/10 rounded transition-colors flex-shrink-0"
               @click="emit('clear')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+        <X class="w-3.5 h-3.5" />
       </button>
     </div>
     <transition name="expand">

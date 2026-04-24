@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { api } from '@/api/wiki.js';
+import { ChevronDown } from 'lucide-vue-next';
 
 const props = defineProps({
   sectionKey: { type: String, required: true },
@@ -67,10 +68,7 @@ function diffLines(before, after) {
           <span class="text-[12px] font-medium text-heading">{{ fmt(entry.changedAt) }}</span>
           <span v-if="entry.changeReason" class="text-[11px] text-muted italic">— {{ entry.changeReason }}</span>
         </div>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-             class="w-4 h-4 text-muted transition-transform" :class="expanded === i ? 'rotate-180' : ''">
-          <path d="M6 9l6 6 6-6" />
-        </svg>
+        <ChevronDown class="w-4 h-4 text-muted transition-transform" :class="expanded === i ? 'rotate-180' : ''" />
       </button>
       <transition name="expand">
         <div v-if="expanded === i" class="border-t border-border">

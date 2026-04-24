@@ -10,6 +10,7 @@ import PinButton from '@/components/ui/PinButton.vue';
 import ConnectedSectionsModal from '@/components/section/ConnectedSectionsModal.vue';
 import TagBadge from '@/components/ui/TagBadge.vue';
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue';
+import { Network, FileText, Link, Clock, ChevronDown, Share2, ArrowRight } from 'lucide-vue-next';
 
 const route = useRoute();
 const router = useRouter();
@@ -105,10 +106,7 @@ function navigate(key) {
               title="View connected sections"
               @click="connectionsModal?.open()"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
-                <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
-                <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98" />
-              </svg>
+              <Network class="w-3.5 h-3.5" />
               Read Connected
             </button>
           </div>
@@ -123,13 +121,14 @@ function navigate(key) {
       <!-- Tabs -->
       <div class="flex gap-1 p-1 bg-surface rounded-xl border border-border mb-6 w-fit">
         <button
-          v-for="tab in ['content', 'connections', 'history']"
-          :key="tab"
-          :class="['px-4 py-1.5 rounded-lg text-[13px] font-medium transition-all duration-150 capitalize',
-            activeTab === tab ? 'bg-elevated text-accent shadow-sm' : 'text-muted hover:text-heading hover:bg-accent/5']"
-          @click="activeTab = tab"
+          v-for="tab in [{ id: 'content', icon: FileText }, { id: 'connections', icon: Link }, { id: 'history', icon: Clock }]"
+          :key="tab.id"
+          :class="['flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[13px] font-medium transition-all duration-150 capitalize',
+            activeTab === tab.id ? 'bg-elevated text-accent shadow-sm' : 'text-muted hover:text-heading hover:bg-accent/5']"
+          @click="activeTab = tab.id"
         >
-          {{ tab }}
+          <component :is="tab.icon" class="w-3.5 h-3.5" />
+          {{ tab.id }}
         </button>
       </div>
 
@@ -148,15 +147,19 @@ function navigate(key) {
 
         <!-- Related -->
         <div v-if="section.relatedSections?.length" class="mt-8 pt-6 border-t border-border">
-          <h3 class="text-[12px] font-semibold text-heading uppercase tracking-wider mb-3">Related Sections</h3>
+          <h3 class="flex items-center gap-1.5 text-[12px] font-semibold text-heading uppercase tracking-wider mb-3">
+            <Share2 class="w-3.5 h-3.5" />
+            Related Sections
+          </h3>
           <div class="flex flex-wrap gap-2">
             <button
               v-for="rel in section.relatedSections"
               :key="rel.key"
-              class="px-3 py-1.5 rounded-lg border border-border bg-surface text-[13px] text-text hover:border-accent/30 hover:text-accent hover:bg-accent/5 transition-all duration-150"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-surface text-[13px] text-text hover:border-accent/30 hover:text-accent hover:bg-accent/5 transition-all duration-150"
               @click="navigate(rel.key)"
             >
               {{ rel.title }}
+              <ArrowRight class="w-3 h-3" />
             </button>
           </div>
         </div>

@@ -1,4 +1,6 @@
 <script setup>
+import { FileText, Eye } from 'lucide-vue-next';
+
 defineProps({
   result: { type: Object, required: true },
   active: { type: Boolean, default: false },
@@ -12,9 +14,11 @@ defineProps({
       active ? 'bg-accent/10 border-accent/30' : 'border-transparent hover:bg-accent/5 hover:border-accent/20',
     ]"
   >
-    <div class="flex items-start justify-between gap-2">
-      <span class="text-[14px] font-semibold text-heading leading-snug">{{ result.title }}</span>
-      <span v-if="result.accessCount" class="flex-shrink-0 text-[10px] text-muted font-mono bg-elevated px-1.5 py-0.5 rounded">
+    <div class="flex items-start gap-2">
+      <FileText class="w-4 h-4 text-muted flex-shrink-0 mt-0.5" />
+      <span class="text-[14px] font-semibold text-heading leading-snug flex-1">{{ result.title }}</span>
+      <span v-if="result.accessCount" class="flex-shrink-0 flex items-center gap-1 text-[10px] text-muted font-mono bg-elevated px-1.5 py-0.5 rounded">
+        <Eye class="w-2.5 h-2.5" />
         {{ result.accessCount }}×
       </span>
     </div>

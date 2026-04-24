@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { api } from '@/api/wiki.js';
+import { Copy, Check, AlertCircle } from 'lucide-vue-next';
 
 const props = defineProps({
   sectionKey: { type: String, required: true },
@@ -57,15 +58,9 @@ const icon = () => {
     :disabled="state === 'loading'"
     @click="copy"
   >
-    <svg v-if="icon() === 'copy'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
-      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-    </svg>
-    <svg v-else-if="icon() === 'check'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
-      <path d="M20 6L9 17l-5-5" />
-    </svg>
-    <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
-      <circle cx="12" cy="12" r="10" /><path d="M12 8v4M12 16h.01" />
-    </svg>
+    <Copy v-if="icon() === 'copy'" class="w-3.5 h-3.5" />
+    <Check v-else-if="icon() === 'check'" class="w-3.5 h-3.5" />
+    <AlertCircle v-else class="w-3.5 h-3.5" />
     <span v-if="label()">{{ label() }}</span>
   </button>
 </template>

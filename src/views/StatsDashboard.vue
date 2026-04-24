@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { api } from '@/api/wiki.js';
 import StatCard from '@/components/ui/StatCard.vue';
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue';
+import { Layers, FileText, Link, BarChart3, Eye, TrendingUp, Clock } from 'lucide-vue-next';
 
 const props = defineProps({ wikiId: String });
 const router = useRouter();
@@ -47,18 +48,18 @@ function fmtDate(iso) {
     <template v-else-if="stats">
       <!-- Summary cards -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
-        <StatCard label="Total Sections" :value="stats.totalSections" accent />
+        <StatCard label="Total Sections" :value="stats.totalSections" accent :icon="Layers" />
         <StatCard label="With Content" :value="stats.sectionsWithContent"
-          :sub="`${Math.round(stats.sectionsWithContent / stats.totalSections * 100)}% coverage`" />
-        <StatCard label="Total Links" :value="stats.totalLinks" />
+          :sub="`${Math.round(stats.sectionsWithContent / stats.totalSections * 100)}% coverage`" :icon="FileText" />
+        <StatCard label="Total Links" :value="stats.totalLinks" :icon="Link" />
         <StatCard label="Avg Links/Section"
-          :value="(stats.totalLinks / (stats.totalSections || 1)).toFixed(1)" />
+          :value="(stats.totalLinks / (stats.totalSections || 1)).toFixed(1)" :icon="BarChart3" />
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- Most accessed -->
         <div>
-          <h3 class="text-[13px] font-semibold text-heading uppercase tracking-wider mb-3">Most Accessed</h3>
+          <h3 class="flex items-center gap-1.5 text-[13px] font-semibold text-heading uppercase tracking-wider mb-3"><Eye class="w-3.5 h-3.5" /> Most Accessed</h3>
           <div class="space-y-0.5">
             <button
               v-for="(s, i) in (stats.topAccessed || [])"
@@ -81,7 +82,7 @@ function fmtDate(iso) {
 
         <!-- Most linked -->
         <div>
-          <h3 class="text-[13px] font-semibold text-heading uppercase tracking-wider mb-3">Most Linked</h3>
+          <h3 class="flex items-center gap-1.5 text-[13px] font-semibold text-heading uppercase tracking-wider mb-3"><TrendingUp class="w-3.5 h-3.5" /> Most Linked</h3>
           <div class="space-y-0.5">
             <button
               v-for="(s, i) in (stats.topLinked || [])"
@@ -104,7 +105,7 @@ function fmtDate(iso) {
 
       <!-- Recently edited -->
       <div v-if="stats.recentlyEdited?.length" class="mt-8">
-        <h3 class="text-[13px] font-semibold text-heading uppercase tracking-wider mb-3">Recently Edited</h3>
+        <h3 class="flex items-center gap-1.5 text-[13px] font-semibold text-heading uppercase tracking-wider mb-3"><Clock class="w-3.5 h-3.5" /> Recently Edited</h3>
         <div class="space-y-0.5">
           <button
             v-for="s in stats.recentlyEdited"

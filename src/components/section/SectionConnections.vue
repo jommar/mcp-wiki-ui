@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { api } from '@/api/wiki.js';
+import { ArrowDownLeft, ArrowUpRight } from 'lucide-vue-next';
 
 const props = defineProps({
   sectionKey: { type: String, required: true },
@@ -40,7 +41,7 @@ watch(() => props.sectionKey, async (key) => {
       <!-- Inbound -->
       <div>
         <h4 class="text-[11px] font-semibold text-heading uppercase tracking-wider mb-2 flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-[#cbd5e1]" />
+          <ArrowDownLeft class="w-3 h-3 text-[#cbd5e1]" />
           Incoming ({{ inbound.length }})
         </h4>
         <div v-if="!inbound.length" class="text-[12px] text-muted italic">None</div>
@@ -63,7 +64,7 @@ watch(() => props.sectionKey, async (key) => {
       <!-- Outbound -->
       <div>
         <h4 class="text-[11px] font-semibold text-heading uppercase tracking-wider mb-2 flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-[#fbbf24]" />
+          <ArrowUpRight class="w-3 h-3 text-[#fbbf24]" />
           Outgoing ({{ outbound.length }})
         </h4>
         <div v-if="!outbound.length" class="text-[12px] text-muted italic">None</div>

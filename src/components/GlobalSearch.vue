@@ -1,5 +1,6 @@
 <script setup>
 import { useGlobalSearch } from '../composables/useGlobalSearch.js';
+import { Search } from 'lucide-vue-next';
 
 const props = defineProps({
   wikiId: { type: String, required: true },
@@ -31,17 +32,7 @@ defineExpose({ open, close });
     <div v-if="isOpen" class="gs-overlay" @click.self="close" @keydown="handleKeydown">
       <div class="gs-modal">
         <div class="gs-input-area">
-          <svg
-            viewBox="0 0 24 24"
-            width="20"
-            height="20"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <circle cx="11" cy="11" r="7" />
-            <path d="M21 21l-4.35-4.35" />
-          </svg>
+          <Search :width="20" :height="20" fill="none" stroke="currentColor" :stroke-width="2" />
           <input
             ref="inputRef"
             v-model="query"

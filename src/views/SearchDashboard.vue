@@ -5,6 +5,7 @@ import { api } from '@/api/wiki.js';
 import SearchResultItem from '@/components/search/SearchResultItem.vue';
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import { Search } from 'lucide-vue-next';
 
 const props = defineProps({ wikiId: String });
 const router = useRouter();
@@ -49,10 +50,7 @@ function navigate(key) {
 
     <!-- Search input -->
     <div class="relative mb-6">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-           class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted pointer-events-none">
-        <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.35-4.35" />
-      </svg>
+      <Search class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted pointer-events-none" />
       <input
         v-model="query"
         type="text"
@@ -81,9 +79,7 @@ function navigate(key) {
       </div>
     </div>
     <div v-else class="text-center py-16 text-muted">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-12 h-12 mx-auto mb-3 opacity-30">
-        <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.35-4.35" />
-      </svg>
+      <Search class="w-12 h-12 mx-auto mb-3 opacity-30" :stroke-width="1.5" />
       <p class="text-[14px]">Type to search wiki sections</p>
     </div>
   </div>

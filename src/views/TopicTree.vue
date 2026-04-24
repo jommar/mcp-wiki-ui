@@ -5,6 +5,7 @@ import { api } from '@/api/wiki.js';
 import TagBadge from '@/components/ui/TagBadge.vue';
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import { Search, ChevronDown, ChevronsDown, ChevronsUp } from 'lucide-vue-next';
 
 const props = defineProps({ wikiId: String });
 const router = useRouter();
@@ -68,18 +69,15 @@ function navigate(key) {
         <p class="text-[14px] text-muted">{{ groups.length }} topics · {{ totalSections }} sections</p>
       </div>
       <div class="flex items-center gap-2">
-        <button class="text-[12px] text-muted hover:text-heading px-2 py-1 rounded hover:bg-elevated transition-colors" @click="expandAll">Expand all</button>
+        <button class="flex items-center gap-1 text-[12px] text-muted hover:text-heading px-2 py-1 rounded hover:bg-elevated transition-colors" @click="expandAll"><ChevronsDown class="w-3.5 h-3.5" /> Expand all</button>
         <span class="text-border">·</span>
-        <button class="text-[12px] text-muted hover:text-heading px-2 py-1 rounded hover:bg-elevated transition-colors" @click="collapseAll">Collapse all</button>
+        <button class="flex items-center gap-1 text-[12px] text-muted hover:text-heading px-2 py-1 rounded hover:bg-elevated transition-colors" @click="collapseAll"><ChevronsUp class="w-3.5 h-3.5" /> Collapse all</button>
       </div>
     </div>
 
     <!-- Search -->
     <div class="relative mb-6">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-           class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none">
-        <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.35-4.35" />
-      </svg>
+      <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
       <input
         v-model="searchTerm"
         type="text"
@@ -103,10 +101,7 @@ function navigate(key) {
           @click="toggle(group.parent)"
         >
           <div class="flex items-center gap-2">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                 class="w-4 h-4 text-muted transition-transform" :class="expandedParents.has(group.parent) ? '' : '-rotate-90'">
-              <path d="M6 9l6 6 6-6" />
-            </svg>
+            <ChevronDown class="w-4 h-4 text-muted transition-transform" :class="expandedParents.has(group.parent) ? '' : '-rotate-90'" />
             <span class="text-[14px] font-semibold text-heading">{{ group.parent }}</span>
           </div>
           <span class="text-[12px] text-muted font-mono bg-elevated px-2 py-0.5 rounded-full border border-border">

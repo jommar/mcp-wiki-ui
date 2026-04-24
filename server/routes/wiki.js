@@ -107,14 +107,27 @@ router.get('/search', async (req, res) => {
       .filter(Boolean)
       .map((t) => t + ':*')
       .join(' & ');
+    const tagPatterns = query
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((t) => `%${t}%`);
+    const tagClauses = tagPatterns.map((_, i) =>
+      `EXISTS (SELECT 1 FROM jsonb_array_elements_text(tags::jsonb) AS tag WHERE tag ILIKE $${params.length + 1 + i})`
+    ).join(' OR ');
+    const tagCondition = tagClauses.length ? ` OR ${tagClauses}` : '';
+    const tagParams = tagPatterns;
     const { rows } = await pool.query(
       `SELECT key, wiki_id, parent, title, tags, access_count,
               ts_rank(search_vector, to_tsquery('english', $${params.length + 1})) as rank,
               content
        FROM wiki_sections
-       ${where} ${where ? 'AND' : 'WHERE'} search_vector @@ to_tsquery('english', $${params.length + 1})
+       ${where} ${where ? 'AND' : 'WHERE'} (
+         search_vector @@ to_tsquery('english', $${params.length + 1})
+         ${tagCondition}
+       )
        ORDER BY rank DESC LIMIT $${params.length + 2}`,
-      [...params, searchTerms, lim],
+     [...params, searchTerms, ...tagParams, lim],
     );
     res.json({
       results: rows.map((r) => {

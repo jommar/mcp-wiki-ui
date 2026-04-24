@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, watch, nextTick } from 'vue';
 import mermaid from 'mermaid';
+import { AlertTriangle } from 'lucide-vue-next';
 
 const props = defineProps({
   code: String,
@@ -69,19 +70,7 @@ watch(
       <span>Rendering diagram...</span>
     </div>
     <div v-else-if="error" class="mermaid-error">
-      <svg
-        viewBox="0 0 24 24"
-        width="16"
-        height="16"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-      >
-        <path
-          d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
-        />
-        <path d="M12 9v4M12 17h.01" />
-      </svg>
+      <AlertTriangle :width="16" :height="16" fill="none" stroke="currentColor" :stroke-width="2" />
       <span>{{ error }}</span>
     </div>
     <div v-else ref="container" class="mermaid-container" />

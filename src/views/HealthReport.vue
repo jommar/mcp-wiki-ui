@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { api } from '@/api/wiki.js';
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import { ShieldCheck, ArrowRight, FileX, Unlink } from 'lucide-vue-next';
 
 const props = defineProps({ wikiId: String });
 const router = useRouter();
@@ -27,8 +28,8 @@ onMounted(load);
 watch(() => props.wikiId, load);
 
 const tabs = computed(() => [
-  { id: 'empty', label: 'Empty', count: report.value?.emptySections?.length || 0, color: 'text-danger' },
-  { id: 'orphaned', label: 'Orphaned', count: report.value?.orphanedSections?.length || 0, color: 'text-warning' },
+  { id: 'empty', label: 'Empty', count: report.value?.emptySections?.length || 0, color: 'text-danger', icon: FileX },
+  { id: 'orphaned', label: 'Orphaned', count: report.value?.orphanedSections?.length || 0, color: 'text-warning', icon: Unlink },
 ]);
 
 const activeList = computed(() => {
@@ -67,7 +68,7 @@ function navigate(key) {
 
       <!-- Overall health -->
       <div v-if="!report.emptySections?.length && !report.orphanedSections?.length" class="text-center py-10">
-        <div class="text-success text-[48px] mb-3">✓</div>
+        <ShieldCheck class="w-12 h-12 text-success mx-auto mb-3" />
         <p class="text-[18px] font-semibold text-heading">Wiki looks healthy!</p>
         <p class="text-[14px] text-muted mt-1">No empty or orphaned sections found</p>
       </div>
@@ -82,6 +83,7 @@ function navigate(key) {
               activeTab === tab.id ? 'bg-elevated shadow-sm text-heading' : 'text-muted hover:text-heading hover:bg-accent/5']"
             @click="activeTab = tab.id"
           >
+            <component :is="tab.icon" class="w-3.5 h-3.5" />
             {{ tab.label }}
             <span :class="['text-[11px] font-mono px-1.5 py-0.5 rounded-full', activeTab === tab.id ? tab.color + ' bg-current/10' : 'bg-elevated text-muted']">
               {{ tab.count }}
@@ -107,9 +109,7 @@ function navigate(key) {
                 <code class="text-[11px] text-muted font-mono">{{ s.key }}</code>
               </div>
             </div>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 text-muted">
-              <path d="M5 12h14M13 6l6 6-6 6" />
-            </svg>
+            <ArrowRight class="w-4 h-4 text-muted" />
           </button>
         </div>
       </template>

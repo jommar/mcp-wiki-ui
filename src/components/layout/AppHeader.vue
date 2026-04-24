@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { usePinnedSections } from '@/composables/usePinnedSections.js';
+import { Sun, Network, Search, LayoutGrid, ShieldCheck, BarChart3, Star } from 'lucide-vue-next';
 
 const props = defineProps({
   wikis: { type: Array, default: () => [] },
@@ -46,10 +47,7 @@ function navigatePinned(item) {
       <div class="flex items-center gap-3 flex-shrink-0">
         <div class="w-9 h-9 flex items-center justify-center rounded-[8px] text-white"
              style="background: linear-gradient(135deg, #818cf8, #a78bfa);">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5">
-            <circle cx="12" cy="12" r="3" />
-            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-          </svg>
+          <Sun class="w-5 h-5" />
         </div>
         <div>
           <h1 class="text-[15px] font-bold text-heading leading-tight tracking-tight">Wiki Explorer</h1>
@@ -70,24 +68,11 @@ function navigatePinned(item) {
           ]"
           @click="go(item)"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="w-4 h-4 flex-shrink-0">
-            <template v-if="item.icon === 'graph'">
-              <circle cx="5" cy="6" r="2" /><circle cx="19" cy="6" r="2" /><circle cx="12" cy="18" r="2" />
-              <path d="M7 7l4 9M17 7l-4 9M7 6h10" />
-            </template>
-            <template v-else-if="item.icon === 'search'">
-              <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.35-4.35" />
-            </template>
-            <template v-else-if="item.icon === 'topics'">
-              <path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" />
-            </template>
-            <template v-else-if="item.icon === 'health'">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" />
-            </template>
-            <template v-else-if="item.icon === 'stats'">
-              <path d="M18 20V10M12 20V4M6 20v-6" />
-            </template>
-          </svg>
+          <component
+            :is="{ graph: Network, search: Search, topics: LayoutGrid, health: ShieldCheck, stats: BarChart3 }[item.icon]"
+            class="w-4 h-4 flex-shrink-0"
+            :stroke-width="1.8"
+          />
           <span class="hidden sm:inline">{{ item.label }}</span>
         </button>
       </nav>
@@ -101,9 +86,7 @@ function navigatePinned(item) {
               pinnedOpen ? 'border-accent/40 bg-accent/10 text-accent' : 'border-border bg-bg text-muted hover:border-accent/30 hover:text-heading']"
             @click="pinnedOpen = !pinnedOpen"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-            </svg>
+            <Star class="w-4 h-4" />
             <span class="hidden sm:inline">Pinned</span>
             <span v-if="pinned.length"
                   class="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-accent text-white text-[9px] font-bold flex items-center justify-center">
@@ -142,9 +125,7 @@ function navigatePinned(item) {
           class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border bg-bg text-muted text-[12px] font-medium hover:border-accent/30 hover:text-heading hover:bg-accent/5 transition-all duration-150"
           @click="emit('open-search')"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
-            <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.35-4.35" />
-          </svg>
+          <Search class="w-4 h-4" />
           <span class="hidden sm:inline">Search</span>
           <kbd class="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] border border-border bg-elevated text-muted font-mono">⌘K</kbd>
         </button>

@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { usePinnedSections } from '../composables/usePinnedSections.js';
+import { Star, X } from 'lucide-vue-next';
 
 const props = defineProps({
   wikiId: { type: String, default: '' },
@@ -56,16 +57,13 @@ onBeforeUnmount(() => {
       :title="`Pinned sections (${pinned.length})`"
       @click="toggle"
     >
-      <svg
-        viewBox="0 0 24 24"
-        width="16"
-        height="16"
+      <Star
+        :width="16"
+        :height="16"
         :fill="pinned.length > 0 ? 'currentColor' : 'none'"
         stroke="currentColor"
-        stroke-width="2"
-      >
-        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-      </svg>
+        :stroke-width="2"
+      />
       <span>Pins</span>
       <span v-if="pinned.length > 0" class="pin-count">{{ pinned.length }}</span>
     </button>
@@ -76,9 +74,7 @@ onBeforeUnmount(() => {
           <span>Pinned Sections</span>
         </div>
         <div v-if="!pinned.length" class="dropdown-empty">
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-          </svg>
+          <Star :width="24" :height="24" fill="none" stroke="currentColor" :stroke-width="1.5" />
           <p>No pinned sections yet</p>
           <span>Pin a section using the star button in the section viewer</span>
         </div>
@@ -97,9 +93,7 @@ onBeforeUnmount(() => {
               </span>
             </div>
             <button class="item-remove" title="Unpin" @click="remove(item, $event)">
-              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M18 6L6 18M6 6l12 12" />
-              </svg>
+              <X :width="13" :height="13" fill="none" stroke="currentColor" :stroke-width="2" />
             </button>
           </li>
         </ul>

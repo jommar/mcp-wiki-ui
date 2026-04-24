@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue';
 import { api } from '@/api/wiki.js';
 import CopyLinksButton from '@/components/ui/CopyLinksButton.vue';
+import { X, CircleDot, Eye, Link, Frown } from 'lucide-vue-next';
 
 const props = defineProps({
   node: { type: Object, required: true },
@@ -41,7 +42,7 @@ const color = () => props.parentColors[props.node?.parent || 'Root'] || '#818cf8
       </div>
       <button class="w-7 h-7 flex items-center justify-center text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors flex-shrink-0 ml-2"
               @click="emit('close')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg>
+        <X class="w-4 h-4" />
       </button>
     </div>
 
@@ -50,9 +51,7 @@ const color = () => props.parentColors[props.node?.parent || 'Root'] || '#818cf8
       <code class="block text-[12px] text-accent font-mono">{{ node.id }}</code>
       <p class="text-[12px] text-muted">{{ node.parent || 'Root' }}</p>
       <p v-if="node.centrality" class="flex items-center gap-1 text-[12px] text-muted">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
-          <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" />
-        </svg>
+        <CircleDot class="w-3.5 h-3.5" />
         {{ node.centrality }} connections
       </p>
     </div>
@@ -63,9 +62,7 @@ const color = () => props.parentColors[props.node?.parent || 'Root'] || '#818cf8
         class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border border-accent/30 bg-accent/10 text-accent text-[13px] font-semibold hover:bg-accent hover:text-white hover:border-accent transition-all duration-150"
         @click="emit('navigate', node.id)"
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
-          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
-        </svg>
+        <Eye class="w-4 h-4" />
         View Content
       </button>
       <CopyLinksButton :section-key="node.id" :wiki-id="wikiId" :incoming="true" :outgoing="true" />
@@ -75,10 +72,7 @@ const color = () => props.parentColors[props.node?.parent || 'Root'] || '#818cf8
     <div class="flex-1 overflow-y-auto">
       <div class="flex items-center justify-between px-4 py-2.5 border-b border-border sticky top-0 bg-surface/80 backdrop-blur">
         <h4 class="text-[11px] font-semibold text-heading uppercase tracking-wider flex items-center gap-1.5">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
-            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-          </svg>
+          <Link class="w-3.5 h-3.5" />
           Incoming Links ({{ backlinks.length }})
         </h4>
         <CopyLinksButton :section-key="node.id" :wiki-id="wikiId" :incoming="true" label="Copy" />
@@ -88,9 +82,7 @@ const color = () => props.parentColors[props.node?.parent || 'Root'] || '#818cf8
         <div class="w-4 h-4 rounded-full border-2 border-border border-t-accent animate-spin" />
       </div>
       <div v-else-if="!backlinks.length" class="flex flex-col items-center gap-2 py-8 text-muted">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-8 h-8 opacity-40">
-          <circle cx="12" cy="12" r="10" /><path d="M8 15s1.5 2 4 2 4-2 4-2" /><path d="M9 9h.01M15 9h.01" />
-        </svg>
+        <Frown class="w-8 h-8 opacity-40" />
         <p class="text-[13px]">No incoming links</p>
       </div>
       <div v-else class="px-2 py-1">

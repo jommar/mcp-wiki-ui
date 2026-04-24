@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { api } from '@/api/wiki.js';
 import SectionContent from './SectionContent.vue';
+import { Check, Copy, X, Frown, ArrowLeft, ArrowRight, ArrowUpDown, ChevronRight } from 'lucide-vue-next';
 
 const props = defineProps({
   sectionKey: { type: String, required: true },
@@ -116,21 +117,15 @@ defineExpose({ open });
                     : 'border-border bg-elevated text-muted hover:border-accent/30 hover:text-accent hover:bg-accent/5']"
                 @click="copyAll"
               >
-                <svg v-if="copiedKey === '__all__'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-                <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
-                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                </svg>
+                <Check v-if="copiedKey === '__all__'" class="w-3.5 h-3.5" />
+                <Copy v-else class="w-3.5 h-3.5" />
                 {{ copiedKey === '__all__' ? 'Copied!' : 'Copy All' }}
               </button>
               <button
                 class="w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:text-danger hover:bg-danger/10 transition-colors"
                 @click="close"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
+                <X class="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -145,9 +140,7 @@ defineExpose({ open });
 
             <!-- Empty -->
             <div v-else-if="!sections.length" class="flex flex-col items-center justify-center gap-3 py-16 text-muted">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-10 h-10 opacity-30">
-                <circle cx="12" cy="12" r="10" /><path d="M8 15s1.5 2 4 2 4-2 4-2" /><path d="M9 9h.01M15 9h.01" />
-              </svg>
+              <Frown class="w-10 h-10 opacity-30" />
               <p class="text-[14px]">No connected sections</p>
             </div>
 
@@ -172,15 +165,12 @@ defineExpose({ open });
                         ? 'text-[#94a3b8] border-[#cbd5e1]/30 bg-[#cbd5e1]/10'
                         : 'text-[#d97706] border-[#fbbf24]/30 bg-[#fbbf24]/10']"
                   >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-2.5 h-2.5">
-                      <path v-if="s.direction === 'incoming'" d="M19 12H5M11 6l-6 6 6 6" />
-                      <path v-else d="M5 12h14M13 6l6 6-6 6" />
-                    </svg>
+                    <ArrowLeft v-if="s.direction === 'incoming'" class="w-2.5 h-2.5" :stroke-width="2.5" />
+                    <ArrowRight v-else class="w-2.5 h-2.5" :stroke-width="2.5" />
                     {{ s.direction }}
                   </span>
                   <span v-else class="flex items-center gap-0.5 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border border-border text-muted bg-elevated">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-2.5 h-2.5"><path d="M7 16V4m0 0L3 8m4-4l4 4" /></svg>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-2.5 h-2.5"><path d="M17 8v12m0 0l4-4m-4 4l-4-4" /></svg>
+                    <ArrowUpDown class="w-2.5 h-2.5" :stroke-width="2.5" />
                     both
                   </span>
                   <!-- Copy section -->
@@ -192,12 +182,8 @@ defineExpose({ open });
                     :title="copiedKey === s.key ? 'Copied!' : 'Copy section'"
                     @click="copySection(s)"
                   >
-                    <svg v-if="copiedKey === s.key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-3.5 h-3.5">
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                    <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
-                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                    </svg>
+                    <Check v-if="copiedKey === s.key" class="w-3.5 h-3.5" :stroke-width="2.5" />
+                    <Copy v-else class="w-3.5 h-3.5" />
                   </button>
                   <!-- Navigate -->
                   <button
@@ -205,7 +191,7 @@ defineExpose({ open });
                     @click="navigate(s.key)"
                   >
                     Open
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3"><path d="M9 18l6-6-6-6" /></svg>
+                    <ChevronRight class="w-3 h-3" />
                   </button>
                 </div>
               </div>

@@ -2,6 +2,7 @@
 import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue';
 import { api } from '@/api/wiki.js';
 import SearchResultItem from './SearchResultItem.vue';
+import { Search } from 'lucide-vue-next';
 
 const props = defineProps({ wikiId: String });
 const emit = defineEmits(['navigate']);
@@ -89,9 +90,7 @@ defineExpose({ open: show });
         >
           <!-- Input -->
           <div class="flex items-center gap-3 px-5 py-4 border-b border-border">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 text-muted flex-shrink-0">
-              <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.35-4.35" />
-            </svg>
+            <Search class="w-5 h-5 text-muted flex-shrink-0" />
             <input
               ref="inputEl"
               v-model="query"

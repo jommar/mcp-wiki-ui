@@ -384,7 +384,7 @@ export function useForceGraph(containerRef, nodesData, edgesData, options = {}) 
 
   function panTo(x, y) {
     if (!d3ctx) return;
-    d3ctx.svg.transition().duration(150).call(d3ctx.zoom.translateTo, x, y);
+    d3ctx.svg.call(d3ctx.zoom.translateTo, x, y);
   }
 
   function setHealthIssues(issues) {

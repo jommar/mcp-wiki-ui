@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue';
 import { api } from '@/api/wiki.js';
 import CopyLinksButton from '@/components/ui/CopyLinksButton.vue';
+import { ArrowRight, ArrowLeft } from 'lucide-vue-next';
 
 const props = defineProps({
   tooltip: { type: Object, required: true },
@@ -47,12 +48,12 @@ function pos() {
     <div class="flex gap-2 mb-2">
       <span class="flex items-center gap-1 text-[11px] font-semibold font-mono px-2 py-0.5 rounded-full border"
             :style="{ color: COLOR_OUT, borderColor: COLOR_OUT }">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-3 h-3"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        <ArrowRight class="w-3 h-3" :stroke-width="2.5" />
         {{ tooltip.outgoing }}
       </span>
       <span class="flex items-center gap-1 text-[11px] font-semibold font-mono px-2 py-0.5 rounded-full border"
             :style="{ color: COLOR_IN, borderColor: COLOR_IN }">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-3 h-3"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+        <ArrowLeft class="w-3 h-3" :stroke-width="2.5" />
         {{ tooltip.incoming }}
       </span>
     </div>
