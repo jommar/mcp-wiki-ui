@@ -117,10 +117,9 @@ wiki-ui/
 - Section navigation with backlinks
 - Connections tab showing inbound/outbound links
 - Content diff visualization
-- CopyLinksButton for copying linked section content (configurable direction; supports `keys` array prop to fetch and copy arbitrary sections directly)
-- ConnectedSectionsButton — auto-opens on load, shows all incoming/outgoing sections in a single scrollable modal with direction badges (silver/gold), per-section copy, and copy-all; supports `keys` array prop to display arbitrary sections (e.g., TopicTree filtered view) without direction badges
-- Tab state synced to URL (`?tab=`) for shareable links
-- PinButton in section header to pin/unpin the current section
+- CopyLinksButton for copying linked section content (configurable incoming/outgoing direction)
+- **Read Connected** button in header opens ConnectedSectionsModal — shows all incoming/outgoing sections in a scrollable modal with direction badges (silver = incoming, gold = outgoing), per-section copy, and copy-all
+- PinButton in section header to pin/unpin the current section; state shared via `usePinnedSections` singleton composable
 
 ### Pinned Sections
 

@@ -94,23 +94,23 @@ src/
 - When neither direction specified and no `keys`, copies the section itself
 - Used in KnowledgeGraph tooltip/detail panel, SectionViewer (content header, connections tab, backlinks tab), and ConnectedSectionsButton modal header
 
-### PinButton / PinnedSectionsPanel / usePinnedSections
+### PinButton / usePinnedSections
 
-- `PinButton` — star toggle in the SectionViewer header; filled when the section is pinned
-- `PinnedSectionsPanel` — dropdown in the app header listing all pinned sections; emits `navigate` event (handled by App.vue which also syncs `selectedWiki`)
+- `PinButton` — star toggle in SectionViewer header; filled/labeled "Pinned" when active
 - `usePinnedSections` composable — module-level singleton `ref` so all components share reactive pin state without Pinia; persists to `localStorage` under `wiki-pinned-sections`
 - Each pin stores `{ key, wikiId, title, pinnedAt }`
-- Navigation from pins calls `handlePinNavigate` in App.vue which updates `selectedWiki` before pushing the route — this ensures SectionViewer receives the correct `wikiId` prop
+- **Call pattern**: `toggle({ key, wikiId, title })` — pass an object, not separate args
+- Pinned panel is inlined in `AppHeader.vue` (not a separate component); clicking a pin navigates via `router.push`
 
-### ConnectedSectionsButton
+### ConnectedSectionsModal
 
-- Button + teleported modal that loads and displays section content
-- Props: `wikiId`, `sectionKey`, `keys` (array), `autoOpen` (boolean, default false)
-- **`keys` mode**: when `keys` array is provided, fetches those sections directly via `getSectionsBatch` and displays their content (no direction badges). Used by TopicTree to show all currently filtered sections.
-- **`sectionKey` mode**: when only `sectionKey` is provided, fetches incoming/outgoing links via `getLinksContent`, merges into one list with direction badges.
-- Auto-opens on mount when `autoOpen` prop is true (set in SectionViewer)
-- Direction badge per card: silver = incoming, gold = outgoing (matching KnowledgeGraph edge colors); hidden in `keys` mode
-- Per-section copy button (copies content from memory, no extra API call) and copy-all via CopyLinksButton in modal header
+- Self-contained modal (`defineExpose({ open })`) triggered from SectionViewer's "Read Connected" header button
+- Props: `sectionKey` (required), `wikiId`
+- Fetches via two parallel `api.linksContent` calls (one `incoming: true`, one `outgoing: true`); merges by key into a Map, skipping the anchor section itself
+- Direction per card: silver badge = incoming, gold badge = outgoing; muted "both" badge when section links in both directions
+- Per-section copy icon button (copies `# title\n\ncontent`); Copy All button in modal header (joins with `---` separators)
+- Results cached in component — re-opening the modal for the same section does not re-fetch
+- Teleported to body, z-index 300; closes on Escape and click-outside
 
 ### Filter Awareness
 

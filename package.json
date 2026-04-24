@@ -1,26 +1,19 @@
 {
   "name": "wiki-ui",
   "private": true,
-  "version": "0.0.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "server": "node server/index.js",
     "dev:all": "concurrently \"npm run server\" \"npm run dev\"",
     "build": "vite build",
-    "preview": "vite preview",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "check": "npm run lint && npm run format:check",
-    "fix": "npm run lint:fix && npm run format"
+    "preview": "vite preview"
   },
   "dependencies": {
     "concurrently": "^9.2.1",
     "cors": "^2.8.6",
     "d3": "^7.9.0",
-    "diff": "^9.0.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "highlight.js": "^11.11.1",
@@ -31,14 +24,9 @@
     "vue-router": "^4.6.4"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
+    "@tailwindcss/vite": "^4.1.4",
     "@vitejs/plugin-vue": "^6.0.5",
-    "eslint": "^10.2.1",
-    "eslint-plugin-vue": "^10.8.0",
-    "eslint-plugin-vue-scoped-css": "^3.0.0",
-    "globals": "^17.5.0",
-    "prettier": "^3.8.3",
-    "vite": "^8.0.4",
-    "vue-eslint-parser": "^10.4.0"
+    "tailwindcss": "^4.1.4",
+    "vite": "^8.0.4"
   }
 }

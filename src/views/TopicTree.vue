@@ -1,553 +1,140 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { wikiApi } from '../api/wiki.js';
-import ConnectedSectionsButton from '../components/ConnectedSectionsButton.vue';
+import { api } from '@/api/wiki.js';
+import TagBadge from '@/components/ui/TagBadge.vue';
+import LoadingSpinner from '@/components/ui/LoadingSpinner.vue';
+import EmptyState from '@/components/ui/EmptyState.vue';
 
 const props = defineProps({ wikiId: String });
 const router = useRouter();
 
 const groups = ref([]);
 const loading = ref(true);
+const searchTerm = ref('');
 const expandedParents = ref(new Set());
-const searchFilter = ref('');
+const viewMode = ref('tree'); // tree | flat
 
-const filteredGroups = computed(() => {
-  if (!searchFilter.value) return groups.value;
-  const term = searchFilter.value.toLowerCase();
-  return groups.value
-    .map((g) => ({
-      ...g,
-      sections: g.sections.filter(
-        (s) => s.title.toLowerCase().includes(term) || s.key.toLowerCase().includes(term),
-      ),
-    }))
-    .filter((g) => g.sections.length > 0);
-});
-
-const filteredKeys = computed(() =>
-  filteredGroups.value.flatMap((g) => g.sections.map((s) => s.key)),
-);
-
-onMounted(async () => {
-  await loadData();
-});
-
-watch(
-  () => props.wikiId,
-  async () => {
-    await loadData();
-  },
-);
-
-async function loadData() {
+async function load() {
   loading.value = true;
   try {
-    const data = await wikiApi.browse(null, props.wikiId, 1000);
+    const data = await api.browse(undefined, props.wikiId || undefined);
     groups.value = data.groups || [];
-    groups.value.forEach((g) => expandedParents.value.add(g.parent));
-  } catch (err) {
-    console.error('Failed to load topics:', err);
+    expandedParents.value = new Set(groups.value.map((g) => g.parent));
+  } catch {
+    groups.value = [];
   } finally {
     loading.value = false;
   }
 }
 
-function toggleParent(parent) {
-  if (expandedParents.value.has(parent)) {
-    expandedParents.value.delete(parent);
-  } else {
-    expandedParents.value.add(parent);
-  }
-  expandedParents.value = new Set(expandedParents.value);
+onMounted(load);
+watch(() => props.wikiId, load);
+
+const filtered = computed(() => {
+  const term = searchTerm.value.toLowerCase().trim();
+  if (!term) return groups.value;
+  return groups.value
+    .map((g) => ({
+      ...g,
+      sections: g.sections.filter(
+        (s) => s.title.toLowerCase().includes(term) || s.key.toLowerCase().includes(term)
+      ),
+    }))
+    .filter((g) => g.sections.length || g.parent.toLowerCase().includes(term));
+});
+
+const totalSections = computed(() => groups.value.reduce((sum, g) => sum + g.sections.length, 0));
+
+function toggle(parent) {
+  const s = new Set(expandedParents.value);
+  s.has(parent) ? s.delete(parent) : s.add(parent);
+  expandedParents.value = s;
 }
 
-function expandAll() {
-  groups.value.forEach((g) => expandedParents.value.add(g.parent));
-  expandedParents.value = new Set(expandedParents.value);
-}
+function expandAll() { expandedParents.value = new Set(groups.value.map((g) => g.parent)); }
+function collapseAll() { expandedParents.value = new Set(); }
 
-function collapseAll() {
-  expandedParents.value.clear();
-  expandedParents.value = new Set();
-}
-
-function navigateTo(key) {
-  router.push({
-    name: 'section',
-    params: { sectionKey: key },
-    query: props.wikiId ? { wikiId: props.wikiId } : {},
-  });
-}
-
-function getDepthClass(depth) {
-  if (depth <= 2) return 'depth-h2';
-  if (depth === 3) return 'depth-h3';
-  return 'depth-h4';
+function navigate(key) {
+  router.push({ name: 'section', params: { key }, query: props.wikiId ? { wikiId: props.wikiId } : {} });
 }
 </script>
 
 <template>
-  <div class="topic-tree">
-    <div class="tree-header">
-      <div class="header-content">
-        <h2>
-          <svg
-            viewBox="0 0 24 24"
-            width="22"
-            height="22"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" />
-          </svg>
-          Topic Hierarchy
-        </h2>
-        <p class="header-desc">Browse wiki sections organized by topic</p>
+  <div class="max-w-5xl mx-auto px-6 py-8">
+    <div class="flex items-start justify-between mb-6 gap-4 flex-wrap">
+      <div>
+        <h2 class="text-[22px] font-bold text-heading mb-1">Topics</h2>
+        <p class="text-[14px] text-muted">{{ groups.length }} topics · {{ totalSections }} sections</p>
       </div>
-      <div class="tree-controls">
-        <div class="search-wrapper">
-          <svg
-            class="search-icon"
-            viewBox="0 0 24 24"
-            width="16"
-            height="16"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <circle cx="11" cy="11" r="7" />
-            <path d="M21 21l-4.35-4.35" />
-          </svg>
-          <input
-            v-model="searchFilter"
-            type="text"
-            placeholder="Filter topics..."
-            class="tree-filter"
-          />
-        </div>
-        <button class="control-btn" @click="expandAll">
-          <svg
-            viewBox="0 0 24 24"
-            width="14"
-            height="14"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M7 10l5 5 5-5" />
-          </svg>
-          Expand
-        </button>
-        <button class="control-btn" @click="collapseAll">
-          <svg
-            viewBox="0 0 24 24"
-            width="14"
-            height="14"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M7 14l5-5 5 5" />
-          </svg>
-          Collapse
-        </button>
-        <div class="preview-btn-wrapper">
-          <ConnectedSectionsButton
-            v-if="filteredKeys.length > 0"
-            :wiki-id="wikiId"
-            :keys="filteredKeys"
-            label="Preview Sections"
-          />
-        </div>
+      <div class="flex items-center gap-2">
+        <button class="text-[12px] text-muted hover:text-heading px-2 py-1 rounded hover:bg-elevated transition-colors" @click="expandAll">Expand all</button>
+        <span class="text-border">·</span>
+        <button class="text-[12px] text-muted hover:text-heading px-2 py-1 rounded hover:bg-elevated transition-colors" @click="collapseAll">Collapse all</button>
       </div>
     </div>
 
-    <div v-if="loading" class="loading-state">
-      <div class="loading-spinner" />
-      <span>Loading topics...</span>
+    <!-- Search -->
+    <div class="relative mb-6">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none">
+        <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.35-4.35" />
+      </svg>
+      <input
+        v-model="searchTerm"
+        type="text"
+        placeholder="Filter topics and sections…"
+        class="w-full pl-9 pr-4 py-2 rounded-lg border border-border bg-surface text-text text-[14px] placeholder:text-muted focus:outline-none focus:border-accent/50 transition-colors"
+      />
     </div>
 
-    <div v-else class="tree-content">
-      <div class="tree-stats">
-        <span class="stat-pill">
-          <svg
-            viewBox="0 0 24 24"
-            width="14"
-            height="14"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-          </svg>
-          {{ groups.length }} groups
-        </span>
-        <span class="stat-pill">
-          <svg
-            viewBox="0 0 24 24"
-            width="14"
-            height="14"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-            <path d="M14 2v6h6" />
-          </svg>
-          {{ groups.reduce((sum, g) => sum + g.sections.length, 0) }} sections
-        </span>
-      </div>
+    <LoadingSpinner v-if="loading" class="mx-auto mt-8" size="lg" />
+    <EmptyState v-else-if="!filtered.length" title="No topics found" />
 
-      <div class="tree-list">
-        <div v-for="group in filteredGroups" :key="group.parent" class="tree-group">
-          <div class="group-header" @click="toggleParent(group.parent)">
-            <span class="group-toggle">
-              <svg
-                viewBox="0 0 24 24"
-                width="14"
-                height="14"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                :class="{ 'toggle-open': expandedParents.has(group.parent) }"
-              >
-                <path d="M6 9l6 6 6-6" />
-              </svg>
-            </span>
-            <span class="group-name">{{ group.parent }}</span>
-            <span class="group-count">{{ group.sections.length }}</span>
+    <div v-else class="space-y-2">
+      <div
+        v-for="group in filtered"
+        :key="group.parent"
+        class="rounded-xl border border-border bg-surface overflow-hidden"
+      >
+        <!-- Parent header -->
+        <button
+          class="w-full flex items-center justify-between px-4 py-3 hover:bg-elevated transition-colors"
+          @click="toggle(group.parent)"
+        >
+          <div class="flex items-center gap-2">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 class="w-4 h-4 text-muted transition-transform" :class="expandedParents.has(group.parent) ? '' : '-rotate-90'">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+            <span class="text-[14px] font-semibold text-heading">{{ group.parent }}</span>
           </div>
+          <span class="text-[12px] text-muted font-mono bg-elevated px-2 py-0.5 rounded-full border border-border">
+            {{ group.sections.length }}
+          </span>
+        </button>
 
-          <transition name="expand">
-            <div v-show="expandedParents.has(group.parent)" class="group-children">
-              <div
-                v-for="section in group.sections"
-                :key="section.key"
-                :class="['section-item', getDepthClass(section.depth)]"
-                @click="navigateTo(section.key)"
-              >
-                <span class="section-icon">
-                  <svg
-                    v-if="section.depth <= 2"
-                    viewBox="0 0 24 24"
-                    width="14"
-                    height="14"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <path d="M14 2v6h6" />
-                  </svg>
-                  <svg
-                    v-else
-                    viewBox="0 0 24 24"
-                    width="14"
-                    height="14"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <path d="M14 2v6h6" />
-                    <path d="M16 13H8M16 17H8M10 9H8" />
-                  </svg>
-                </span>
-                <span class="section-title">{{ section.title }}</span>
-                <span class="section-key">{{ section.key }}</span>
+        <!-- Sections -->
+        <transition name="expand">
+          <div v-if="expandedParents.has(group.parent)" class="border-t border-border">
+            <button
+              v-for="section in group.sections"
+              :key="section.key"
+              class="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-accent/5 border-b border-border/50 last:border-0 transition-colors group"
+              @click="navigate(section.key)"
+            >
+              <div class="flex-1 min-w-0">
+                <span class="block text-[13px] font-medium text-heading group-hover:text-accent transition-colors truncate">{{ section.title }}</span>
+                <span class="block text-[11px] text-muted font-mono mt-0.5 truncate">{{ section.key }}</span>
               </div>
-            </div>
-          </transition>
-        </div>
+              <div class="flex items-center gap-2 ml-3 flex-shrink-0">
+                <TagBadge v-for="tag in (section.tags || []).slice(0, 2)" :key="tag" :tag="tag" />
+                <span v-if="section.contentLength" class="text-[10px] text-muted font-mono">{{ Math.round(section.contentLength / 100) / 10 }}k</span>
+              </div>
+            </button>
+          </div>
+        </transition>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.topic-tree {
-  padding: 24px;
-  height: 100%;
-  overflow-y: auto;
-}
-
-.tree-header {
-  margin-bottom: 20px;
-}
-
-.header-content {
-  margin-bottom: 16px;
-}
-
-.header-content h2 {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--text-h);
-  margin: 0 0 6px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.header-content h2 svg {
-  color: var(--accent);
-}
-
-.header-desc {
-  font-size: 14px;
-  color: var(--text-muted);
-  margin: 0;
-}
-
-.tree-controls {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.search-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.search-icon {
-  position: absolute;
-  left: 10px;
-  width: 14px;
-  height: 14px;
-  color: var(--text-muted);
-  pointer-events: none;
-}
-
-.tree-filter {
-  padding: 8px 10px 8px 32px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--bg-elevated);
-  color: var(--text);
-  font-size: 13px;
-  width: 200px;
-  transition: var(--transition);
-}
-
-.tree-filter:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-bg);
-}
-
-.control-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  border: 1px solid var(--border);
-  background: var(--bg-elevated);
-  color: var(--text);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 500;
-  transition: var(--transition);
-}
-
-.control-btn:hover {
-  background: var(--accent-bg);
-  color: var(--accent);
-  border-color: var(--accent-border);
-}
-
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 60px 0;
-  color: var(--text-muted);
-}
-
-.loading-spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid var(--border);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.tree-stats {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
-.stat-pill {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--text-muted);
-  background: var(--bg-elevated);
-  padding: 6px 12px;
-  border-radius: 20px;
-  border: 1px solid var(--border);
-  font-weight: 500;
-}
-
-.stat-pill svg {
-  color: var(--accent);
-}
-
-.tree-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.tree-group {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: var(--bg-elevated);
-  transition: var(--transition);
-}
-
-.tree-group:hover {
-  border-color: var(--accent-border);
-}
-
-.group-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  background: var(--bg);
-  cursor: pointer;
-  user-select: none;
-  transition: var(--transition);
-}
-
-.group-header:hover {
-  background: var(--accent-bg);
-}
-
-.group-toggle {
-  display: flex;
-  color: var(--text-muted);
-  transition: transform 0.2s;
-}
-
-.toggle-open {
-  transform: rotate(180deg);
-}
-
-.group-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-h);
-  flex: 1;
-}
-
-.group-count {
-  font-size: 12px;
-  color: var(--text-muted);
-  background: var(--bg-elevated);
-  padding: 2px 10px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  font-weight: 600;
-  font-family: var(--mono);
-}
-
-.group-children {
-  padding: 4px 0;
-}
-
-.section-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 14px 8px 40px;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.section-item:hover {
-  background: var(--accent-bg);
-}
-
-.depth-h3 .section-item {
-  padding-left: 56px;
-}
-
-.depth-h4 .section-item {
-  padding-left: 72px;
-}
-
-.section-icon {
-  display: flex;
-  color: var(--text-muted);
-  flex-shrink: 0;
-}
-
-.section-title {
-  font-size: 13px;
-  color: var(--text-h);
-  flex: 1;
-  font-weight: 500;
-}
-
-.section-key {
-  font-size: 11px;
-  color: var(--text-muted);
-  font-family: var(--mono);
-  opacity: 0.6;
-}
-
-.expand-enter-active,
-.expand-leave-active {
-  transition: all 0.25s ease;
-  overflow: hidden;
-}
-
-.expand-enter-from,
-.expand-leave-to {
-  opacity: 0;
-  max-height: 0;
-}
-
-.expand-enter-to,
-.expand-leave-from {
-  opacity: 1;
-  max-height: 2000px;
-}
-
-/* ConnectedSectionsButton inside tree controls */
-.preview-btn-wrapper {
-  margin-left: auto;
-}
-
-.preview-btn-wrapper :deep(.view-connections-btn) {
-  padding: 8px 12px;
-  background: var(--accent);
-  color: var(--bg);
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.preview-btn-wrapper :deep(.view-connections-btn:hover) {
-  opacity: 0.85;
-}
-</style>
