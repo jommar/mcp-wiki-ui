@@ -314,10 +314,6 @@ function onOverlayKeydown(e) {
   font-size: 14px;
 }
 
-.empty-state svg {
-  opacity: 0.3;
-}
-
 /* Section cards */
 .section-card {
   border: 1px solid var(--border);

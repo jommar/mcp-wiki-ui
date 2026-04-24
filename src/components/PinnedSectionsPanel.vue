@@ -179,10 +179,6 @@ onBeforeUnmount(() => {
   text-align: center;
 }
 
-.dropdown-empty svg {
-  opacity: 0.25;
-}
-
 .dropdown-empty p {
   margin: 0;
   font-size: 14px;

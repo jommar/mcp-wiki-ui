@@ -108,10 +108,6 @@ defineExpose({ open, close });
   padding: 14px 16px;
   border-bottom: 1px solid var(--border);
 }
-.gs-input-area svg {
-  color: var(--text-muted);
-  flex-shrink: 0;
-}
 .gs-input {
   flex: 1;
   border: none;
