@@ -37,16 +37,6 @@ function navigatePinned(item) {
   router.push({ name: 'section', params: { key: item.key }, query: item.wikiId ? { wikiId: item.wikiId } : {} });
 }
 
-function handleKeydown(e) {
-  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-    e.preventDefault();
-    emit('open-search');
-  }
-}
-
-import { onMounted, onUnmounted } from 'vue';
-onMounted(() => document.addEventListener('keydown', handleKeydown));
-onUnmounted(() => document.removeEventListener('keydown', handleKeydown));
 </script>
 
 <template>

@@ -382,6 +382,11 @@ export function useForceGraph(containerRef, nodesData, edgesData, options = {}) 
     d3ctx.svg.transition().call(d3ctx.zoom.translateTo, node.x, node.y);
   }
 
+  function panTo(x, y) {
+    if (!d3ctx) return;
+    d3ctx.svg.transition().duration(150).call(d3ctx.zoom.translateTo, x, y);
+  }
+
   function setHealthIssues(issues) {
     healthIssues.value = issues;
   }
@@ -407,6 +412,6 @@ export function useForceGraph(containerRef, nodesData, edgesData, options = {}) 
     zoomIn, zoomOut, resetZoom,
     toggleFocusMode, toggleLayout,
     clearParentFilter: () => { selectedParents.value = new Set(); applyFilters(); },
-    panToNode, setHealthIssues,
+    panToNode, panTo, setHealthIssues,
   };
 }

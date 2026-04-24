@@ -8,9 +8,13 @@ const props = defineProps({
   colors: { type: Object, default: () => ({}) },
 });
 
+const emit = defineEmits(['pan-to']);
+
 const containerEl = ref(null);
 const MW = 180, MH = 120;
+const pad = 8;
 let minimapSvg, minimapG;
+let mmXMin = 0, mmYMin = 0, mmScale = 1;
 
 onMounted(() => { initMinimap(); });
 
@@ -19,16 +23,35 @@ function initMinimap() {
   containerEl.value.innerHTML = '';
   minimapSvg = d3.select(containerEl.value).append('svg')
     .attr('width', MW).attr('height', MH)
-    .style('background', 'transparent').style('cursor', 'default');
+    .style('background', 'transparent').style('cursor', 'crosshair');
   minimapG = minimapSvg.append('g');
   minimapG.append('rect').attr('class', 'mm-vp')
     .attr('fill', 'rgba(129,140,248,0.1)').attr('stroke', '#818cf8')
     .attr('stroke-width', 1.5).attr('rx', 2).attr('x', 0).attr('y', 0)
     .attr('width', MW).attr('height', MH);
+
+  minimapSvg.call(
+    d3.drag()
+      .on('start drag', (event) => {
+        const [mx, my] = d3.pointer(event);
+        emit('pan-to', {
+          x: (mx - pad) / mmScale + mmXMin,
+          y: (my - pad) / mmScale + mmYMin,
+        });
+      }),
+  );
 }
 
 watch(() => props.nodes, () => updateNodes(), { deep: true });
 watch(() => props.bounds, () => updateViewport(), { deep: true });
+
+function computeScale(xs, ys) {
+  const xMin = Math.min(...xs), xMax = Math.max(...xs);
+  const yMin = Math.min(...ys), yMax = Math.max(...ys);
+  const sx = (MW - pad * 2) / (xMax - xMin || 1);
+  const sy = (MH - pad * 2) / (yMax - yMin || 1);
+  return { xMin, yMin, scale: Math.min(sx, sy) };
+}
 
 function updateNodes() {
   if (!minimapG || !props.nodes.length) return;
@@ -36,12 +59,8 @@ function updateNodes() {
   const ys = props.nodes.map((n) => n.y).filter((v) => v != null);
   if (!xs.length) return;
 
-  const pad = 8;
-  const xMin = Math.min(...xs), xMax = Math.max(...xs);
-  const yMin = Math.min(...ys), yMax = Math.max(...ys);
-  const sx = (MW - pad * 2) / (xMax - xMin || 1);
-  const sy = (MH - pad * 2) / (yMax - yMin || 1);
-  const scale = Math.min(sx, sy);
+  const { xMin, yMin, scale } = computeScale(xs, ys);
+  mmXMin = xMin; mmYMin = yMin; mmScale = scale;
 
   const circles = minimapG.selectAll('.mm-node').data(props.nodes, (d) => d.id);
   circles.exit().remove();
@@ -59,13 +78,8 @@ function updateViewport() {
   const xs = props.nodes.map((n) => n.x).filter((v) => v != null);
   const ys = props.nodes.map((n) => n.y).filter((v) => v != null);
   if (!xs.length) return;
-  const pad = 8;
-  const xMin = Math.min(...xs), xMax = Math.max(...xs);
-  const yMin = Math.min(...ys), yMax = Math.max(...ys);
-  const sx = (MW - pad * 2) / (xMax - xMin || 1);
-  const sy = (MH - pad * 2) / (yMax - yMin || 1);
-  const scale = Math.min(sx, sy);
 
+  const { xMin, yMin, scale } = computeScale(xs, ys);
   const k = transform.k, tx = transform.x, ty = transform.y;
   const vx = pad + (-tx / k - xMin) * scale;
   const vy = pad + (-ty / k - yMin) * scale;

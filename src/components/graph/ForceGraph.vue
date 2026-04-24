@@ -76,6 +76,7 @@ watch(graph.navigateTo, (key) => {
         :nodes="graph.minimapNodes.value"
         :bounds="graph.minimapBounds.value"
         :colors="graph.parentColors.value"
+        @pan-to="({ x, y }) => graph.panTo(x, y)"
       />
 
       <transition name="slide-right">
