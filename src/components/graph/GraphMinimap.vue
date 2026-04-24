@@ -33,10 +33,9 @@ function initMinimap() {
   minimapSvg.call(
     d3.drag()
       .on('start drag', (event) => {
-        const [mx, my] = d3.pointer(event);
         emit('pan-to', {
-          x: (mx - pad) / mmScale + mmXMin,
-          y: (my - pad) / mmScale + mmYMin,
+          x: (event.x - pad) / mmScale + mmXMin,
+          y: (event.y - pad) / mmScale + mmYMin,
         });
       }),
   );
