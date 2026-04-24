@@ -1,5 +1,3 @@
-import { ref } from 'vue';
-
 const navigationHistory = ref([]);
 const currentBreadcrumb = ref(['Home']);
 

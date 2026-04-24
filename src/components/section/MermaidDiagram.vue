@@ -1,5 +1,4 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue';
 import mermaid from 'mermaid';
 
 mermaid.initialize({ startOnLoad: false, theme: 'dark', darkMode: true, securityLevel: 'loose' });

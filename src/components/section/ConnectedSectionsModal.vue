@@ -1,6 +1,4 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
 import { api } from '@/api/wiki.js';
 import SectionContent from './SectionContent.vue';
 import { Check, Copy, X, Frown, ArrowLeft, ArrowRight, ArrowUpDown, ChevronRight } from 'lucide-vue-next';
@@ -11,7 +9,6 @@ const props = defineProps({
 });
 
 const router = useRouter();
-const route = useRoute();
 
 const visible = ref(false);
 const loading = ref(false);
@@ -19,7 +16,7 @@ const sections = ref([]);
 const copiedKey = ref(null);
 let copyTimer = null;
 
-async function open() {
+function open() {
   visible.value = true;
   if (sections.value.length) return; // already loaded
   load();

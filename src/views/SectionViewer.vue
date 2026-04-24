@@ -1,6 +1,4 @@
 <script setup>
-import { ref, watch, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
 import { api } from '@/api/wiki.js';
 import SectionContent from '@/components/section/SectionContent.vue';
 import SectionConnections from '@/components/section/SectionConnections.vue';
@@ -10,7 +8,7 @@ import PinButton from '@/components/ui/PinButton.vue';
 import ConnectedSectionsModal from '@/components/section/ConnectedSectionsModal.vue';
 import TagBadge from '@/components/ui/TagBadge.vue';
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue';
-import { Network, FileText, Link, Clock, ChevronDown, Share2, ArrowRight } from 'lucide-vue-next';
+import { Network, FileText, Link, Clock, Share2, ArrowRight } from 'lucide-vue-next';
 
 const route = useRoute();
 const router = useRouter();

@@ -1,5 +1,4 @@
 <script setup>
-import { ref, onMounted, watch, nextTick } from 'vue';
 import mermaid from 'mermaid';
 import { AlertTriangle } from 'lucide-vue-next';
 

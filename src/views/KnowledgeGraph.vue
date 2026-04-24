@@ -1,5 +1,4 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue';
 import { api } from '@/api/wiki.js';
 import ForceGraph from '@/components/graph/ForceGraph.vue';
 

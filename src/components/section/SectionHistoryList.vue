@@ -1,5 +1,4 @@
 <script setup>
-import { ref, watch } from 'vue';
 import { api } from '@/api/wiki.js';
 import { ChevronDown } from 'lucide-vue-next';
 

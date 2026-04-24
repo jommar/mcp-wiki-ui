@@ -1,5 +1,4 @@
 <script setup>
-import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue';
 import { api } from '@/api/wiki.js';
 import SearchResultItem from './SearchResultItem.vue';
 import { Search } from 'lucide-vue-next';

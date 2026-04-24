@@ -1,6 +1,4 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
 import { api } from './api/wiki.js';
 import AppHeader from './components/layout/AppHeader.vue';
 import GlobalSearch from './components/search/GlobalSearch.vue';
@@ -16,7 +14,7 @@ onMounted(async () => {
   try {
     const data = await api.info();
     wikis.value = data.wikis || [];
-  } catch {}
+  } catch { /* ignore */ }
 });
 
 watch(

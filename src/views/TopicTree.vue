@@ -1,6 +1,4 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import { api } from '@/api/wiki.js';
 import TagBadge from '@/components/ui/TagBadge.vue';
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue';
@@ -14,7 +12,6 @@ const groups = ref([]);
 const loading = ref(true);
 const searchTerm = ref('');
 const expandedParents = ref(new Set());
-const viewMode = ref('tree'); // tree | flat
 
 async function load() {
   loading.value = true;

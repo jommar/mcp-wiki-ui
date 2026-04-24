@@ -1,8 +1,7 @@
 <script setup>
-import { ref } from 'vue';
 import { ChevronDown, X } from 'lucide-vue-next';
 
-const props = defineProps({
+defineProps({
   colors: { type: Object, default: () => ({}) },
   selected: { type: Object, default: () => new Set() },
 });

@@ -1,7 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
 import { api } from '@/api/wiki.js';
-import CopyLinksButton from '@/components/ui/CopyLinksButton.vue';
 import { ArrowRight, ArrowLeft } from 'lucide-vue-next';
 
 const props = defineProps({

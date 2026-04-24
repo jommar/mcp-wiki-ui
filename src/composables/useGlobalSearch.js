@@ -1,4 +1,3 @@
-import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { wikiApi } from '../api/wiki.js';
 
 /**

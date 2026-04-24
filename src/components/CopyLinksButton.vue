@@ -1,5 +1,4 @@
 <script setup>
-import { ref } from 'vue';
 import { wikiApi } from '../api/wiki.js';
 import { Check, Copy, Loader } from 'lucide-vue-next';
 

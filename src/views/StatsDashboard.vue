@@ -1,6 +1,4 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import { api } from '@/api/wiki.js';
 import StatCard from '@/components/ui/StatCard.vue';
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue';

@@ -1,6 +1,4 @@
 <script setup>
-import { ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
 import { useForceGraph } from '@/composables/useForceGraph.js';
 import GraphToolbar from './GraphToolbar.vue';
 import GraphLegend from './GraphLegend.vue';

@@ -1,5 +1,3 @@
-import { ref } from 'vue';
-
 const STORAGE_KEY = 'wiki-pinned-sections';
 
 function load() {

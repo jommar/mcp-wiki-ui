@@ -1,6 +1,4 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
 import { wikiApi } from '../api/wiki.js';
 import { marked } from 'marked';
 import CopyLinksButton from './CopyLinksButton.vue';

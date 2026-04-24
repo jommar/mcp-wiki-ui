@@ -1,4 +1,3 @@
-import { ref, watch, onUnmounted } from 'vue';
 import * as d3 from 'd3';
 
 const COLOR_OUTGOING = '#fbbf24';
@@ -11,7 +10,7 @@ const PALETTE = [
   '#d63031', '#00b894', '#e84393', '#0984e3', '#b2bec3',
 ];
 
-export function useForceGraph(containerRef, nodesData, edgesData, options = {}) {
+export function useForceGraph(containerRef, nodesData, edgesData, _options = {}) {
   const selectedNode = ref(null);
   const filterText = ref('');
   const focusMode = ref(false);
@@ -260,7 +259,7 @@ export function useForceGraph(containerRef, nodesData, edgesData, options = {}) 
     d3ctx = { svg, g, zoom, simulation, linkGroup, nodeGroup, nodeData, linkData, adjacency, maxCentrality, colorScale, w, h, clusterCenters };
   }
 
-  function highlight(nodeId, adjacency, linkData, maxCentrality) {
+  function highlight(nodeId, adjacency, _linkData, _maxCentrality) {
     const neighbors = new Set(adjacency.get(nodeId) || []);
     neighbors.add(nodeId);
 
@@ -295,7 +294,7 @@ export function useForceGraph(containerRef, nodesData, edgesData, options = {}) 
       .select('.node-main').attr('filter', 'url(#strong-glow)');
   }
 
-  function resetHighlight(linkData, maxCentrality) {
+  function resetHighlight(_linkData, _maxCentrality) {
     const tf = filterText.value.toLowerCase();
     d3.selectAll('.graph-link').transition().duration(300)
       .attr('stroke-opacity', 0.3).attr('stroke', '#27272a').attr('stroke-width', 1.2);
@@ -324,7 +323,7 @@ export function useForceGraph(containerRef, nodesData, edgesData, options = {}) 
     minimapBounds.value = { xMin: Math.min(...xs), xMax: Math.max(...xs), yMin: Math.min(...ys), yMax: Math.max(...ys), w, h };
   }
 
-  function updateMinimapViewport(transform, w, h) {
+  function updateMinimapViewport(transform, _w, _h) {
     if (!minimapBounds.value) return;
     minimapBounds.value = { ...minimapBounds.value, transform };
   }

@@ -1,5 +1,4 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue';
 import * as d3 from 'd3';
 
 const props = defineProps({
@@ -54,8 +53,8 @@ function computeScale(xs, ys) {
 
 function updateNodes() {
   if (!minimapG || !props.nodes.length) return;
-  const xs = props.nodes.map((n) => n.x).filter((v) => v != null);
-  const ys = props.nodes.map((n) => n.y).filter((v) => v != null);
+  const xs = props.nodes.map((n) => n.x).filter((v) => v !== null && v !== undefined);
+  const ys = props.nodes.map((n) => n.y).filter((v) => v !== null && v !== undefined);
   if (!xs.length) return;
 
   const { xMin, yMin, scale } = computeScale(xs, ys);
@@ -74,8 +73,8 @@ function updateViewport() {
   if (!minimapG || !props.bounds || !props.nodes.length) return;
   const { transform, w, h } = props.bounds;
   if (!transform) return;
-  const xs = props.nodes.map((n) => n.x).filter((v) => v != null);
-  const ys = props.nodes.map((n) => n.y).filter((v) => v != null);
+  const xs = props.nodes.map((n) => n.x).filter((v) => v !== null && v !== undefined);
+  const ys = props.nodes.map((n) => n.y).filter((v) => v !== null && v !== undefined);
   if (!xs.length) return;
 
   const { xMin, yMin, scale } = computeScale(xs, ys);

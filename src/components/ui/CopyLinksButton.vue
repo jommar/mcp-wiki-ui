@@ -1,5 +1,4 @@
 <script setup>
-import { ref } from 'vue';
 import { api } from '@/api/wiki.js';
 import { Copy, Check, AlertCircle } from 'lucide-vue-next';
 

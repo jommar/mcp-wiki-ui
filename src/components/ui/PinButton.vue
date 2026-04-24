@@ -1,5 +1,4 @@
 <script setup>
-import { computed } from 'vue';
 import { usePinnedSections } from '@/composables/usePinnedSections.js';
 import { Star } from 'lucide-vue-next';
 

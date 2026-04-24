@@ -1,6 +1,4 @@
 <script setup>
-import { ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
 import { api } from '@/api/wiki.js';
 import SearchResultItem from '@/components/search/SearchResultItem.vue';
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue';

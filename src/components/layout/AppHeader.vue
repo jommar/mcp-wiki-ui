@@ -1,6 +1,4 @@
 <script setup>
-import { ref, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
 import { usePinnedSections } from '@/composables/usePinnedSections.js';
 import { Sun, Network, Search, LayoutGrid, ShieldCheck, BarChart3, Star } from 'lucide-vue-next';
 

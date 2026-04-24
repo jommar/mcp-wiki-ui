@@ -1,5 +1,4 @@
 <script setup>
-import { ref, watch } from 'vue';
 import { api } from '@/api/wiki.js';
 import CopyLinksButton from '@/components/ui/CopyLinksButton.vue';
 import { X, CircleDot, Eye, Link, Frown } from 'lucide-vue-next';

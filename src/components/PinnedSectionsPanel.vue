@@ -1,9 +1,8 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { usePinnedSections } from '../composables/usePinnedSections.js';
 import { Star, X } from 'lucide-vue-next';
 
-const props = defineProps({
+defineProps({
   wikiId: { type: String, default: '' },
 });
 

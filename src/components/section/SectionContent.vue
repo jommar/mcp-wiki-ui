@@ -1,5 +1,4 @@
 <script setup>
-import { ref, watch } from 'vue';
 import { marked, Renderer } from 'marked';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github-dark.css';
