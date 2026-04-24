@@ -80,7 +80,9 @@ function diffLines(before, after) {
                 line.type === 'added' ? 'bg-success/10 text-success' :
                 line.type === 'removed' ? 'bg-danger/10 text-danger line-through opacity-70' : 'text-text',
               ]"
-            >{{ line.type === 'added' ? '+ ' : line.type === 'removed' ? '- ' : '  ' }}{{ line.text }}</div>
+            >
+{{ line.type === 'added' ? '+ ' : line.type === 'removed' ? '- ' : '  ' }}{{ line.text }}
+</div>
           </div>
         </div>
       </transition>
