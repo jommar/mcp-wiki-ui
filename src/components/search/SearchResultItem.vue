@@ -11,22 +11,34 @@ defineProps({
   <div
     :class="[
       'px-4 py-3 rounded-lg cursor-pointer transition-all duration-100 border',
-      active ? 'bg-accent/10 border-accent/30' : 'border-transparent hover:bg-accent/5 hover:border-accent/20',
+      active
+        ? 'bg-accent/10 border-accent/30'
+        : 'border-transparent hover:bg-accent/5 hover:border-accent/20',
     ]"
   >
     <div class="flex items-start gap-2">
       <FileText class="w-4 h-4 text-muted flex-shrink-0 mt-0.5" />
-      <span class="text-[14px] font-semibold text-heading leading-snug flex-1">{{ result.title }}</span>
-      <span v-if="result.accessCount" class="flex-shrink-0 flex items-center gap-1 text-[10px] text-muted font-mono bg-elevated px-1.5 py-0.5 rounded">
+      <span class="text-[14px] font-semibold text-heading leading-snug flex-1">{{
+        result.title
+      }}</span>
+      <span
+        v-if="result.accessCount"
+        class="flex-shrink-0 flex items-center gap-1 text-[10px] text-muted font-mono bg-elevated px-1.5 py-0.5 rounded"
+      >
         <Eye class="w-2.5 h-2.5" />
         {{ result.accessCount }}×
       </span>
     </div>
     <div class="flex items-center gap-2 mt-0.5">
-      <code class="text-[11px] text-accent font-mono bg-accent/10 px-1.5 py-0.5 rounded">{{ result.key }}</code>
+      <code class="text-[11px] text-accent font-mono bg-accent/10 px-1.5 py-0.5 rounded">{{
+        result.key
+      }}</code>
       <span class="text-[11px] text-muted">{{ result.parent }}</span>
-      <span v-for="tag in (result.tags || []).slice(0, 3)" :key="tag"
-            class="text-[10px] text-muted bg-elevated px-1.5 py-0.5 rounded-full border border-border">
+      <span
+        v-for="tag in (result.tags || []).slice(0, 3)"
+        :key="tag"
+        class="text-[10px] text-muted bg-elevated px-1.5 py-0.5 rounded-full border border-border"
+      >
         {{ tag }}
       </span>
     </div>

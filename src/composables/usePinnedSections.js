@@ -32,9 +32,7 @@ export function usePinnedSections() {
   }
 
   function unpin(key, wikiId) {
-    pinned.value = pinned.value.filter(
-      (p) => !(p.key === key && p.wikiId === (wikiId || '')),
-    );
+    pinned.value = pinned.value.filter((p) => !(p.key === key && p.wikiId === (wikiId || '')));
     save();
   }
 

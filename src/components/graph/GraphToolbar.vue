@@ -11,8 +11,13 @@ defineProps({
   selectedParentCount: Number,
 });
 const emit = defineEmits([
-  'update:filter', 'toggle-layout', 'toggle-focus',
-  'zoom-in', 'zoom-out', 'reset-zoom', 'clear-filter',
+  'update:filter',
+  'toggle-layout',
+  'toggle-focus',
+  'zoom-in',
+  'zoom-out',
+  'reset-zoom',
+  'clear-filter',
 ]);
 </script>
 
@@ -33,8 +38,12 @@ const emit = defineEmits([
     <!-- Tools -->
     <div class="flex items-center gap-1">
       <button
-        :class="['flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[12px] font-medium transition-all duration-150',
-          focusMode ? 'border-accent/40 bg-accent/10 text-accent' : 'border-border bg-bg text-muted hover:text-heading hover:bg-accent/5']"
+        :class="[
+          'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[12px] font-medium transition-all duration-150',
+          focusMode
+            ? 'border-accent/40 bg-accent/10 text-accent'
+            : 'border-border bg-bg text-muted hover:text-heading hover:bg-accent/5',
+        ]"
         title="Focus mode: dim unrelated nodes on hover"
         @click="emit('toggle-focus')"
       >
@@ -43,8 +52,12 @@ const emit = defineEmits([
       </button>
 
       <button
-        :class="['flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[12px] font-medium transition-all duration-150',
-          layoutMode === 'tree' ? 'border-accent/40 bg-accent/10 text-accent' : 'border-border bg-bg text-muted hover:text-heading hover:bg-accent/5']"
+        :class="[
+          'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[12px] font-medium transition-all duration-150',
+          layoutMode === 'tree'
+            ? 'border-accent/40 bg-accent/10 text-accent'
+            : 'border-border bg-bg text-muted hover:text-heading hover:bg-accent/5',
+        ]"
         :title="layoutMode === 'force' ? 'Switch to Tree layout' : 'Switch to Force layout'"
         @click="emit('toggle-layout')"
       >
@@ -55,22 +68,39 @@ const emit = defineEmits([
 
     <!-- Zoom -->
     <div class="flex items-center gap-1 px-1 py-1 rounded-lg border border-border bg-bg">
-      <button class="w-7 h-7 flex items-center justify-center rounded text-text hover:bg-accent/10 hover:text-accent transition-colors" @click="emit('zoom-in')">
+      <button
+        class="w-7 h-7 flex items-center justify-center rounded text-text hover:bg-accent/10 hover:text-accent transition-colors"
+        @click="emit('zoom-in')"
+      >
         <Plus class="w-4 h-4" />
       </button>
-      <span class="text-[12px] text-muted font-mono w-11 text-center select-none">{{ Math.round(zoomLevel * 100) }}%</span>
-      <button class="w-7 h-7 flex items-center justify-center rounded text-text hover:bg-accent/10 hover:text-accent transition-colors" @click="emit('zoom-out')">
+      <span class="text-[12px] text-muted font-mono w-11 text-center select-none"
+        >{{ Math.round(zoomLevel * 100) }}%</span
+      >
+      <button
+        class="w-7 h-7 flex items-center justify-center rounded text-text hover:bg-accent/10 hover:text-accent transition-colors"
+        @click="emit('zoom-out')"
+      >
         <Minus class="w-4 h-4" />
       </button>
-      <button class="px-2 h-7 flex items-center rounded text-[11px] text-muted hover:bg-accent/10 hover:text-accent transition-colors" @click="emit('reset-zoom')">
+      <button
+        class="px-2 h-7 flex items-center rounded text-[11px] text-muted hover:bg-accent/10 hover:text-accent transition-colors"
+        @click="emit('reset-zoom')"
+      >
         <RotateCcw class="w-4 h-4" />
       </button>
     </div>
 
     <!-- Stats -->
     <div class="flex items-center gap-2 ml-auto">
-      <span class="text-[12px] text-muted bg-bg border border-border px-2.5 py-1 rounded-full font-mono">{{ nodeCount }} nodes</span>
-      <span class="text-[12px] text-muted bg-bg border border-border px-2.5 py-1 rounded-full font-mono">{{ edgeCount }} links</span>
+      <span
+        class="text-[12px] text-muted bg-bg border border-border px-2.5 py-1 rounded-full font-mono"
+        >{{ nodeCount }} nodes</span
+      >
+      <span
+        class="text-[12px] text-muted bg-bg border border-border px-2.5 py-1 rounded-full font-mono"
+        >{{ edgeCount }} links</span
+      >
       <button
         v-if="selectedParentCount > 0"
         class="flex items-center gap-1.5 text-[12px] font-semibold text-danger bg-danger/10 border border-danger/30 px-3 py-1 rounded-full hover:bg-danger hover:text-white hover:border-danger transition-all duration-150"

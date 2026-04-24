@@ -46,7 +46,11 @@ async function loadMore() {
   if (!section.value?.nextOffset) return;
   loadingMore.value = true;
   try {
-    const data = await api.section(sectionKey.value, wikiId.value || undefined, section.value.nextOffset);
+    const data = await api.section(
+      sectionKey.value,
+      wikiId.value || undefined,
+      section.value.nextOffset,
+    );
     section.value.content += data.content;
     section.value.hasMore = data.hasMore;
     section.value.nextOffset = data.nextOffset;
@@ -57,7 +61,11 @@ async function loadMore() {
 }
 
 function navigate(key) {
-  router.push({ name: 'section', params: { key }, query: wikiId.value ? { wikiId: wikiId.value } : {} });
+  router.push({
+    name: 'section',
+    params: { key },
+    query: wikiId.value ? { wikiId: wikiId.value } : {},
+  });
 }
 </script>
 
@@ -71,12 +79,17 @@ function navigate(key) {
     <!-- Error -->
     <div v-else-if="error" class="rounded-xl border border-danger/30 bg-danger/10 p-6 text-center">
       <p class="text-danger font-medium">{{ error }}</p>
-      <button class="mt-3 text-[13px] text-muted hover:text-text" @click="router.back()">← Go back</button>
+      <button class="mt-3 text-[13px] text-muted hover:text-text" @click="router.back()">
+        ← Go back
+      </button>
     </div>
 
     <template v-else-if="section">
       <!-- Breadcrumbs -->
-      <nav v-if="section.breadcrumbs?.length" class="flex items-center gap-1.5 text-[12px] text-muted mb-4 flex-wrap">
+      <nav
+        v-if="section.breadcrumbs?.length"
+        class="flex items-center gap-1.5 text-[12px] text-muted mb-4 flex-wrap"
+      >
         <span v-for="(crumb, i) in section.breadcrumbs" :key="i" class="flex items-center gap-1.5">
           <span v-if="i > 0" class="text-border">/</span>
           <span>{{ crumb }}</span>
@@ -87,18 +100,34 @@ function navigate(key) {
       <div class="mb-6">
         <div class="flex items-start justify-between gap-4 mb-3">
           <div class="flex-1 min-w-0">
-            <h1 class="text-[24px] font-bold text-heading leading-tight mb-1">{{ section.title }}</h1>
+            <h1 class="text-[24px] font-bold text-heading leading-tight mb-1">
+              {{ section.title }}
+            </h1>
             <div class="flex items-center gap-2 flex-wrap">
-              <code class="text-[12px] text-accent font-mono bg-accent/10 px-2 py-0.5 rounded">{{ section.key }}</code>
+              <code class="text-[12px] text-accent font-mono bg-accent/10 px-2 py-0.5 rounded">{{
+                section.key
+              }}</code>
               <span class="text-[12px] text-muted">{{ section.parent }}</span>
-              <span v-if="section.accessCount" class="text-[11px] text-muted bg-elevated border border-border px-2 py-0.5 rounded-full font-mono">
+              <span
+                v-if="section.accessCount"
+                class="text-[11px] text-muted bg-elevated border border-border px-2 py-0.5 rounded-full font-mono"
+              >
                 {{ section.accessCount }}× accessed
               </span>
             </div>
           </div>
           <div class="flex items-center gap-2 flex-shrink-0">
-            <PinButton :section-key="section.key" :wiki-id="section.wikiId" :title="section.title" />
-            <CopyLinksButton :section-key="section.key" :wiki-id="section.wikiId" :incoming="true" :outgoing="true" />
+            <PinButton
+              :section-key="section.key"
+              :wiki-id="section.wikiId"
+              :title="section.title"
+            />
+            <CopyLinksButton
+              :section-key="section.key"
+              :wiki-id="section.wikiId"
+              :incoming="true"
+              :outgoing="true"
+            />
             <button
               class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-elevated text-[12px] text-muted hover:border-accent/30 hover:text-accent hover:bg-accent/5 transition-all duration-150"
               title="View connected sections"
@@ -119,10 +148,18 @@ function navigate(key) {
       <!-- Tabs -->
       <div class="flex gap-1 p-1 bg-surface rounded-xl border border-border mb-6 w-fit">
         <button
-          v-for="tab in [{ id: 'content', icon: FileText }, { id: 'connections', icon: Link }, { id: 'history', icon: Clock }]"
+          v-for="tab in [
+            { id: 'content', icon: FileText },
+            { id: 'connections', icon: Link },
+            { id: 'history', icon: Clock },
+          ]"
           :key="tab.id"
-          :class="['flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[13px] font-medium transition-all duration-150 capitalize',
-            activeTab === tab.id ? 'bg-elevated text-accent shadow-sm' : 'text-muted hover:text-heading hover:bg-accent/5']"
+          :class="[
+            'flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[13px] font-medium transition-all duration-150 capitalize',
+            activeTab === tab.id
+              ? 'bg-elevated text-accent shadow-sm'
+              : 'text-muted hover:text-heading hover:bg-accent/5',
+          ]"
           @click="activeTab = tab.id"
         >
           <component :is="tab.icon" class="w-3.5 h-3.5" />
@@ -139,13 +176,19 @@ function navigate(key) {
             :disabled="loadingMore"
             @click="loadMore"
           >
-            {{ loadingMore ? 'Loading…' : `Load more (${section.totalLength - section.content.length} chars remaining)` }}
+            {{
+              loadingMore
+                ? 'Loading…'
+                : `Load more (${section.totalLength - section.content.length} chars remaining)`
+            }}
           </button>
         </div>
 
         <!-- Related -->
         <div v-if="section.relatedSections?.length" class="mt-8 pt-6 border-t border-border">
-          <h3 class="flex items-center gap-1.5 text-[12px] font-semibold text-heading uppercase tracking-wider mb-3">
+          <h3
+            class="flex items-center gap-1.5 text-[12px] font-semibold text-heading uppercase tracking-wider mb-3"
+          >
             <Share2 class="w-3.5 h-3.5" />
             Related Sections
           </h3>
@@ -174,10 +217,7 @@ function navigate(key) {
 
       <!-- History tab -->
       <div v-else-if="activeTab === 'history'">
-        <SectionHistoryList
-          :section-key="section.key"
-          :wiki-id="section.wikiId || wikiId"
-        />
+        <SectionHistoryList :section-key="section.key" :wiki-id="section.wikiId || wikiId" />
       </div>
     </template>
 

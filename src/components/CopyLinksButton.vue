@@ -54,9 +54,32 @@ async function fetchAndCopy() {
 
 <template>
   <button class="copy-links-btn" :disabled="loading" @click="fetchAndCopy">
-    <Check v-if="copied" :width="16" :height="16" fill="none" stroke="currentColor" :stroke-width="2" class="check-icon" />
-    <Copy v-else-if="!loading" :width="16" :height="16" fill="none" stroke="currentColor" :stroke-width="2" />
-    <Loader v-else :width="16" :height="16" fill="none" stroke="currentColor" :stroke-width="2" class="spin" />
+    <Check
+      v-if="copied"
+      :width="16"
+      :height="16"
+      fill="none"
+      stroke="currentColor"
+      :stroke-width="2"
+      class="check-icon"
+    />
+    <Copy
+      v-else-if="!loading"
+      :width="16"
+      :height="16"
+      fill="none"
+      stroke="currentColor"
+      :stroke-width="2"
+    />
+    <Loader
+      v-else
+      :width="16"
+      :height="16"
+      fill="none"
+      stroke="currentColor"
+      :stroke-width="2"
+      class="spin"
+    />
     <span v-if="label">{{ label }}</span>
   </button>
 </template>

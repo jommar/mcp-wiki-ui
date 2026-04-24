@@ -23,7 +23,13 @@ function handleClick() {
     :title="pinned ? 'Unpin section' : 'Pin section'"
     @click="handleClick"
   >
-    <Star :width="16" :height="16" :fill="pinned ? 'currentColor' : 'none'" stroke="currentColor" :stroke-width="2" />
+    <Star
+      :width="16"
+      :height="16"
+      :fill="pinned ? 'currentColor' : 'none'"
+      stroke="currentColor"
+      :stroke-width="2"
+    />
   </button>
 </template>
 

@@ -11,19 +11,23 @@ const history = ref([]);
 const loading = ref(false);
 const expanded = ref(null);
 
-watch([() => props.sectionKey, () => props.wikiId], async () => {
-  if (!props.wikiId) return;
-  loading.value = true;
-  history.value = [];
-  try {
-    const data = await api.history(props.sectionKey, props.wikiId, 10);
-    history.value = data.history || [];
-  } catch {
+watch(
+  [() => props.sectionKey, () => props.wikiId],
+  async () => {
+    if (!props.wikiId) return;
+    loading.value = true;
     history.value = [];
-  } finally {
-    loading.value = false;
-  }
-}, { immediate: true });
+    try {
+      const data = await api.history(props.sectionKey, props.wikiId, 10);
+      history.value = data.history || [];
+    } catch {
+      history.value = [];
+    } finally {
+      loading.value = false;
+    }
+  },
+  { immediate: true },
+);
 
 function fmt(iso) {
   if (!iso) return '';
@@ -52,7 +56,9 @@ function diffLines(before, after) {
       <div class="w-4 h-4 rounded-full border-2 border-border border-t-accent animate-spin" />
       Loading history…
     </div>
-    <div v-else-if="!history.length" class="text-[13px] text-muted italic py-4">No history recorded</div>
+    <div v-else-if="!history.length" class="text-[13px] text-muted italic py-4">
+      No history recorded
+    </div>
     <div
       v-for="(entry, i) in history"
       :key="i"
@@ -65,9 +71,14 @@ function diffLines(before, after) {
         <div class="flex items-center gap-2">
           <span class="w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0" />
           <span class="text-[12px] font-medium text-heading">{{ fmt(entry.changedAt) }}</span>
-          <span v-if="entry.changeReason" class="text-[11px] text-muted italic">— {{ entry.changeReason }}</span>
+          <span v-if="entry.changeReason" class="text-[11px] text-muted italic"
+            >— {{ entry.changeReason }}</span
+          >
         </div>
-        <ChevronDown class="w-4 h-4 text-muted transition-transform" :class="expanded === i ? 'rotate-180' : ''" />
+        <ChevronDown
+          class="w-4 h-4 text-muted transition-transform"
+          :class="expanded === i ? 'rotate-180' : ''"
+        />
       </button>
       <transition name="expand">
         <div v-if="expanded === i" class="border-t border-border">
@@ -77,12 +88,16 @@ function diffLines(before, after) {
               :key="j"
               :class="[
                 'px-4 py-0.5 whitespace-pre',
-                line.type === 'added' ? 'bg-success/10 text-success' :
-                line.type === 'removed' ? 'bg-danger/10 text-danger line-through opacity-70' : 'text-text',
+                line.type === 'added'
+                  ? 'bg-success/10 text-success'
+                  : line.type === 'removed'
+                    ? 'bg-danger/10 text-danger line-through opacity-70'
+                    : 'text-text',
               ]"
             >
-{{ line.type === 'added' ? '+ ' : line.type === 'removed' ? '- ' : '  ' }}{{ line.text }}
-</div>
+              {{ line.type === 'added' ? '+ ' : line.type === 'removed' ? '- ' : '  '
+              }}{{ line.text }}
+            </div>
           </div>
         </div>
       </transition>

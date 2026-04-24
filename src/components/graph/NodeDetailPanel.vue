@@ -13,34 +13,42 @@ const emit = defineEmits(['close', 'navigate']);
 const backlinks = ref([]);
 const loading = ref(false);
 
-watch(() => props.node?.id, async (key) => {
-  if (!key) return;
-  loading.value = true;
-  backlinks.value = [];
-  try {
-    const data = await api.backlinks(key, props.wikiId);
-    backlinks.value = data.backlinks || [];
-  } catch {
+watch(
+  () => props.node?.id,
+  async (key) => {
+    if (!key) return;
+    loading.value = true;
     backlinks.value = [];
-  } finally {
-    loading.value = false;
-  }
-}, { immediate: true });
+    try {
+      const data = await api.backlinks(key, props.wikiId);
+      backlinks.value = data.backlinks || [];
+    } catch {
+      backlinks.value = [];
+    } finally {
+      loading.value = false;
+    }
+  },
+  { immediate: true },
+);
 
 const color = () => props.parentColors[props.node?.parent || 'Root'] || '#818cf8';
 </script>
 
 <template>
-  <div class="absolute right-0 top-0 bottom-0 w-[320px] flex flex-col border-l border-border z-10 overflow-hidden"
-       style="background: var(--glass-bg); backdrop-filter: var(--glass-blur);">
+  <div
+    class="absolute right-0 top-0 bottom-0 w-[320px] flex flex-col border-l border-border z-10 overflow-hidden"
+    style="background: var(--glass-bg); backdrop-filter: var(--glass-blur)"
+  >
     <!-- Header -->
     <div class="flex items-start justify-between p-4 border-b border-border flex-shrink-0">
       <div class="flex items-center gap-2 flex-1 min-w-0">
         <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" :style="{ background: color() }" />
         <h3 class="text-[14px] font-semibold text-heading leading-snug">{{ node.title }}</h3>
       </div>
-      <button class="w-7 h-7 flex items-center justify-center text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors flex-shrink-0 ml-2"
-              @click="emit('close')">
+      <button
+        class="w-7 h-7 flex items-center justify-center text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors flex-shrink-0 ml-2"
+        @click="emit('close')"
+      >
         <X class="w-4 h-4" />
       </button>
     </div>
@@ -69,15 +77,22 @@ const color = () => props.parentColors[props.node?.parent || 'Root'] || '#818cf8
 
     <!-- Backlinks -->
     <div class="flex-1 overflow-y-auto">
-      <div class="flex items-center justify-between px-4 py-2.5 border-b border-border sticky top-0 bg-surface/80 backdrop-blur">
-        <h4 class="text-[11px] font-semibold text-heading uppercase tracking-wider flex items-center gap-1.5">
+      <div
+        class="flex items-center justify-between px-4 py-2.5 border-b border-border sticky top-0 bg-surface/80 backdrop-blur"
+      >
+        <h4
+          class="text-[11px] font-semibold text-heading uppercase tracking-wider flex items-center gap-1.5"
+        >
           <Link class="w-3.5 h-3.5" />
           Incoming Links ({{ backlinks.length }})
         </h4>
         <CopyLinksButton :section-key="node.id" :wiki-id="wikiId" :incoming="true" label="Copy" />
       </div>
 
-      <div v-if="loading" class="flex items-center justify-center gap-2 py-6 text-muted text-[13px]">
+      <div
+        v-if="loading"
+        class="flex items-center justify-center gap-2 py-6 text-muted text-[13px]"
+      >
         <div class="w-4 h-4 rounded-full border-2 border-border border-t-accent animate-spin" />
       </div>
       <div v-else-if="!backlinks.length" class="flex flex-col items-center gap-2 py-8 text-muted">

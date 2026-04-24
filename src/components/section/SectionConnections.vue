@@ -12,22 +12,26 @@ const inbound = ref([]);
 const outbound = ref([]);
 const loading = ref(false);
 
-watch(() => props.sectionKey, async (key) => {
-  if (!key) return;
-  loading.value = true;
-  inbound.value = [];
-  outbound.value = [];
-  try {
-    const data = await api.connections(key, props.wikiId);
-    inbound.value = data.inbound || [];
-    outbound.value = data.outbound || [];
-  } catch {
+watch(
+  () => props.sectionKey,
+  async (key) => {
+    if (!key) return;
+    loading.value = true;
     inbound.value = [];
     outbound.value = [];
-  } finally {
-    loading.value = false;
-  }
-}, { immediate: true });
+    try {
+      const data = await api.connections(key, props.wikiId);
+      inbound.value = data.inbound || [];
+      outbound.value = data.outbound || [];
+    } catch {
+      inbound.value = [];
+      outbound.value = [];
+    } finally {
+      loading.value = false;
+    }
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
@@ -39,7 +43,9 @@ watch(() => props.sectionKey, async (key) => {
     <template v-else>
       <!-- Inbound -->
       <div>
-        <h4 class="text-[11px] font-semibold text-heading uppercase tracking-wider mb-2 flex items-center gap-1.5">
+        <h4
+          class="text-[11px] font-semibold text-heading uppercase tracking-wider mb-2 flex items-center gap-1.5"
+        >
           <ArrowDownLeft class="w-3 h-3 text-[#cbd5e1]" />
           Incoming ({{ inbound.length }})
         </h4>
@@ -53,7 +59,9 @@ watch(() => props.sectionKey, async (key) => {
           >
             <span class="w-1.5 h-1.5 rounded-full bg-[#cbd5e1] flex-shrink-0" />
             <span class="flex-1 min-w-0">
-              <span class="block text-[13px] font-medium text-heading truncate">{{ item.title }}</span>
+              <span class="block text-[13px] font-medium text-heading truncate">{{
+                item.title
+              }}</span>
               <span class="block text-[11px] text-muted">{{ item.parent }}</span>
             </span>
           </button>
@@ -62,7 +70,9 @@ watch(() => props.sectionKey, async (key) => {
 
       <!-- Outbound -->
       <div>
-        <h4 class="text-[11px] font-semibold text-heading uppercase tracking-wider mb-2 flex items-center gap-1.5">
+        <h4
+          class="text-[11px] font-semibold text-heading uppercase tracking-wider mb-2 flex items-center gap-1.5"
+        >
           <ArrowUpRight class="w-3 h-3 text-[#fbbf24]" />
           Outgoing ({{ outbound.length }})
         </h4>
@@ -76,7 +86,9 @@ watch(() => props.sectionKey, async (key) => {
           >
             <span class="w-1.5 h-1.5 rounded-full bg-[#fbbf24] flex-shrink-0" />
             <span class="flex-1 min-w-0">
-              <span class="block text-[13px] font-medium text-heading truncate">{{ item.title }}</span>
+              <span class="block text-[13px] font-medium text-heading truncate">{{
+                item.title
+              }}</span>
               <span class="block text-[11px] text-muted">{{ item.parent }}</span>
             </span>
           </button>

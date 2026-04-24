@@ -26,7 +26,10 @@ watch(() => props.code, render);
 
 <template>
   <div class="my-4">
-    <div v-if="error" class="px-3 py-2 rounded-lg bg-danger/10 border border-danger/30 text-danger text-[12px] font-mono">
+    <div
+      v-if="error"
+      class="px-3 py-2 rounded-lg bg-danger/10 border border-danger/30 text-danger text-[12px] font-mono"
+    >
       Mermaid error: {{ error }}
     </div>
     <div v-else ref="containerEl" class="flex justify-center overflow-x-auto" />

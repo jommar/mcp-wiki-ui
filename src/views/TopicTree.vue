@@ -36,7 +36,7 @@ const filtered = computed(() => {
     .map((g) => ({
       ...g,
       sections: g.sections.filter(
-        (s) => s.title.toLowerCase().includes(term) || s.key.toLowerCase().includes(term)
+        (s) => s.title.toLowerCase().includes(term) || s.key.toLowerCase().includes(term),
       ),
     }))
     .filter((g) => g.sections.length || g.parent.toLowerCase().includes(term));
@@ -50,11 +50,19 @@ function toggle(parent) {
   expandedParents.value = s;
 }
 
-function expandAll() { expandedParents.value = new Set(groups.value.map((g) => g.parent)); }
-function collapseAll() { expandedParents.value = new Set(); }
+function expandAll() {
+  expandedParents.value = new Set(groups.value.map((g) => g.parent));
+}
+function collapseAll() {
+  expandedParents.value = new Set();
+}
 
 function navigate(key) {
-  router.push({ name: 'section', params: { key }, query: props.wikiId ? { wikiId: props.wikiId } : {} });
+  router.push({
+    name: 'section',
+    params: { key },
+    query: props.wikiId ? { wikiId: props.wikiId } : {},
+  });
 }
 </script>
 
@@ -63,18 +71,32 @@ function navigate(key) {
     <div class="flex items-start justify-between mb-6 gap-4 flex-wrap">
       <div>
         <h2 class="text-[22px] font-bold text-heading mb-1">Topics</h2>
-        <p class="text-[14px] text-muted">{{ groups.length }} topics · {{ totalSections }} sections</p>
+        <p class="text-[14px] text-muted">
+          {{ groups.length }} topics · {{ totalSections }} sections
+        </p>
       </div>
       <div class="flex items-center gap-2">
-        <button class="flex items-center gap-1 text-[12px] text-muted hover:text-heading px-2 py-1 rounded hover:bg-elevated transition-colors" @click="expandAll"><ChevronsDown class="w-3.5 h-3.5" /> Expand all</button>
+        <button
+          class="flex items-center gap-1 text-[12px] text-muted hover:text-heading px-2 py-1 rounded hover:bg-elevated transition-colors"
+          @click="expandAll"
+        >
+          <ChevronsDown class="w-3.5 h-3.5" /> Expand all
+        </button>
         <span class="text-border">·</span>
-        <button class="flex items-center gap-1 text-[12px] text-muted hover:text-heading px-2 py-1 rounded hover:bg-elevated transition-colors" @click="collapseAll"><ChevronsUp class="w-3.5 h-3.5" /> Collapse all</button>
+        <button
+          class="flex items-center gap-1 text-[12px] text-muted hover:text-heading px-2 py-1 rounded hover:bg-elevated transition-colors"
+          @click="collapseAll"
+        >
+          <ChevronsUp class="w-3.5 h-3.5" /> Collapse all
+        </button>
       </div>
     </div>
 
     <!-- Search -->
     <div class="relative mb-6">
-      <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
+      <Search
+        class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none"
+      />
       <input
         v-model="searchTerm"
         type="text"
@@ -98,10 +120,15 @@ function navigate(key) {
           @click="toggle(group.parent)"
         >
           <div class="flex items-center gap-2">
-            <ChevronDown class="w-4 h-4 text-muted transition-transform" :class="expandedParents.has(group.parent) ? '' : '-rotate-90'" />
+            <ChevronDown
+              class="w-4 h-4 text-muted transition-transform"
+              :class="expandedParents.has(group.parent) ? '' : '-rotate-90'"
+            />
             <span class="text-[14px] font-semibold text-heading">{{ group.parent }}</span>
           </div>
-          <span class="text-[12px] text-muted font-mono bg-elevated px-2 py-0.5 rounded-full border border-border">
+          <span
+            class="text-[12px] text-muted font-mono bg-elevated px-2 py-0.5 rounded-full border border-border"
+          >
             {{ group.sections.length }}
           </span>
         </button>
@@ -116,12 +143,19 @@ function navigate(key) {
               @click="navigate(section.key)"
             >
               <div class="flex-1 min-w-0">
-                <span class="block text-[13px] font-medium text-heading group-hover:text-accent transition-colors truncate">{{ section.title }}</span>
-                <span class="block text-[11px] text-muted font-mono mt-0.5 truncate">{{ section.key }}</span>
+                <span
+                  class="block text-[13px] font-medium text-heading group-hover:text-accent transition-colors truncate"
+                  >{{ section.title }}</span
+                >
+                <span class="block text-[11px] text-muted font-mono mt-0.5 truncate">{{
+                  section.key
+                }}</span>
               </div>
               <div class="flex items-center gap-2 ml-3 flex-shrink-0">
                 <TagBadge v-for="tag in (section.tags || []).slice(0, 2)" :key="tag" :tag="tag" />
-                <span v-if="section.contentLength" class="text-[10px] text-muted font-mono">{{ Math.round(section.contentLength / 100) / 10 }}k</span>
+                <span v-if="section.contentLength" class="text-[10px] text-muted font-mono"
+                  >{{ Math.round(section.contentLength / 100) / 10 }}k</span
+                >
               </div>
             </button>
           </div>

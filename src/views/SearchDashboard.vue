@@ -17,7 +17,11 @@ let debounce = null;
 
 watch(query, () => {
   clearTimeout(debounce);
-  if (!query.value.trim()) { results.value = []; searched.value = false; return; }
+  if (!query.value.trim()) {
+    results.value = [];
+    searched.value = false;
+    return;
+  }
   debounce = setTimeout(search, 300);
 });
 
@@ -35,7 +39,11 @@ async function search() {
 }
 
 function navigate(key) {
-  router.push({ name: 'section', params: { key }, query: props.wikiId ? { wikiId: props.wikiId } : {} });
+  router.push({
+    name: 'section',
+    params: { key },
+    query: props.wikiId ? { wikiId: props.wikiId } : {},
+  });
 }
 </script>
 
@@ -48,7 +56,9 @@ function navigate(key) {
 
     <!-- Search input -->
     <div class="relative mb-6">
-      <Search class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted pointer-events-none" />
+      <Search
+        class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted pointer-events-none"
+      />
       <input
         v-model="query"
         type="text"
@@ -66,7 +76,9 @@ function navigate(key) {
       <EmptyState title="No results found" :message="`No sections matched &quot;${query}&quot;`" />
     </div>
     <div v-else-if="results.length">
-      <p class="text-[12px] text-muted mb-3">{{ results.length }} result{{ results.length !== 1 ? 's' : '' }} for "{{ query }}"</p>
+      <p class="text-[12px] text-muted mb-3">
+        {{ results.length }} result{{ results.length !== 1 ? 's' : '' }} for "{{ query }}"
+      </p>
       <div class="space-y-1">
         <SearchResultItem
           v-for="result in results"

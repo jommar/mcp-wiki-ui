@@ -14,17 +14,25 @@ onMounted(async () => {
   try {
     const data = await api.info();
     wikis.value = data.wikis || [];
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 });
 
 watch(
   () => route.query.wikiId,
-  (id) => { selectedWiki.value = id || ''; },
+  (id) => {
+    selectedWiki.value = id || '';
+  },
   { immediate: true },
 );
 
 function navigate(key) {
-  router.push({ name: 'section', params: { key }, query: selectedWiki.value ? { wikiId: selectedWiki.value } : {} });
+  router.push({
+    name: 'section',
+    params: { key },
+    query: selectedWiki.value ? { wikiId: selectedWiki.value } : {},
+  });
 }
 
 function changeWiki(id) {
@@ -44,10 +52,6 @@ function changeWiki(id) {
     <main class="flex-1 overflow-auto bg-bg">
       <router-view :wiki-id="selectedWiki" />
     </main>
-    <GlobalSearch
-      ref="globalSearch"
-      :wiki-id="selectedWiki"
-      @navigate="navigate"
-    />
+    <GlobalSearch ref="globalSearch" :wiki-id="selectedWiki" @navigate="navigate" />
   </div>
 </template>

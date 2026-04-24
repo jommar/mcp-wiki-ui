@@ -31,11 +31,6 @@ watch(() => props.wikiId, load);
 
 <template>
   <div class="h-full">
-    <ForceGraph
-      :nodes="nodes"
-      :edges="edges"
-      :wiki-id="wikiId"
-      :health-issues="healthIssues"
-    />
+    <ForceGraph :nodes="nodes" :edges="edges" :wiki-id="wikiId" :health-issues="healthIssues" />
   </div>
 </template>

@@ -26,8 +26,20 @@ onMounted(load);
 watch(() => props.wikiId, load);
 
 const tabs = computed(() => [
-  { id: 'empty', label: 'Empty', count: report.value?.emptySections?.length || 0, color: 'text-danger', icon: FileX },
-  { id: 'orphaned', label: 'Orphaned', count: report.value?.orphanedSections?.length || 0, color: 'text-warning', icon: Unlink },
+  {
+    id: 'empty',
+    label: 'Empty',
+    count: report.value?.emptySections?.length || 0,
+    color: 'text-danger',
+    icon: FileX,
+  },
+  {
+    id: 'orphaned',
+    label: 'Orphaned',
+    count: report.value?.orphanedSections?.length || 0,
+    color: 'text-warning',
+    icon: Unlink,
+  },
 ]);
 
 const activeList = computed(() => {
@@ -36,7 +48,11 @@ const activeList = computed(() => {
 });
 
 function navigate(key) {
-  router.push({ name: 'section', params: { key }, query: props.wikiId ? { wikiId: props.wikiId } : {} });
+  router.push({
+    name: 'section',
+    params: { key },
+    query: props.wikiId ? { wikiId: props.wikiId } : {},
+  });
 }
 </script>
 
@@ -54,18 +70,25 @@ function navigate(key) {
       <div class="grid grid-cols-2 gap-4 mb-8">
         <div class="p-4 rounded-xl border border-danger/30 bg-danger/5">
           <p class="text-[12px] text-muted uppercase tracking-wider mb-1">Empty Sections</p>
-          <p class="text-[32px] font-bold text-danger leading-none">{{ report.emptySections?.length || 0 }}</p>
+          <p class="text-[32px] font-bold text-danger leading-none">
+            {{ report.emptySections?.length || 0 }}
+          </p>
           <p class="text-[12px] text-muted mt-1">sections with no content</p>
         </div>
         <div class="p-4 rounded-xl border border-warning/30 bg-warning/5">
           <p class="text-[12px] text-muted uppercase tracking-wider mb-1">Orphaned</p>
-          <p class="text-[32px] font-bold text-warning leading-none">{{ report.orphanedSections?.length || 0 }}</p>
+          <p class="text-[32px] font-bold text-warning leading-none">
+            {{ report.orphanedSections?.length || 0 }}
+          </p>
           <p class="text-[12px] text-muted mt-1">sections with no links</p>
         </div>
       </div>
 
       <!-- Overall health -->
-      <div v-if="!report.emptySections?.length && !report.orphanedSections?.length" class="text-center py-10">
+      <div
+        v-if="!report.emptySections?.length && !report.orphanedSections?.length"
+        class="text-center py-10"
+      >
         <ShieldCheck class="w-12 h-12 text-success mx-auto mb-3" />
         <p class="text-[18px] font-semibold text-heading">Wiki looks healthy!</p>
         <p class="text-[14px] text-muted mt-1">No empty or orphaned sections found</p>
@@ -77,13 +100,22 @@ function navigate(key) {
           <button
             v-for="tab in tabs"
             :key="tab.id"
-            :class="['px-4 py-1.5 rounded-lg text-[13px] font-medium transition-all duration-150 flex items-center gap-2',
-              activeTab === tab.id ? 'bg-elevated shadow-sm text-heading' : 'text-muted hover:text-heading hover:bg-accent/5']"
+            :class="[
+              'px-4 py-1.5 rounded-lg text-[13px] font-medium transition-all duration-150 flex items-center gap-2',
+              activeTab === tab.id
+                ? 'bg-elevated shadow-sm text-heading'
+                : 'text-muted hover:text-heading hover:bg-accent/5',
+            ]"
             @click="activeTab = tab.id"
           >
             <component :is="tab.icon" class="w-3.5 h-3.5" />
             {{ tab.label }}
-            <span :class="['text-[11px] font-mono px-1.5 py-0.5 rounded-full', activeTab === tab.id ? tab.color + ' bg-current/10' : 'bg-elevated text-muted']">
+            <span
+              :class="[
+                'text-[11px] font-mono px-1.5 py-0.5 rounded-full',
+                activeTab === tab.id ? tab.color + ' bg-current/10' : 'bg-elevated text-muted',
+              ]"
+            >
               {{ tab.count }}
             </span>
           </button>
@@ -101,7 +133,12 @@ function navigate(key) {
             @click="navigate(s.key)"
           >
             <div class="flex items-center gap-3">
-              <span :class="['w-2 h-2 rounded-full flex-shrink-0', activeTab === 'empty' ? 'bg-danger' : 'bg-warning']" />
+              <span
+                :class="[
+                  'w-2 h-2 rounded-full flex-shrink-0',
+                  activeTab === 'empty' ? 'bg-danger' : 'bg-warning',
+                ]"
+              />
               <div>
                 <span class="block text-[13px] font-medium text-heading">{{ s.title }}</span>
                 <code class="text-[11px] text-muted font-mono">{{ s.key }}</code>

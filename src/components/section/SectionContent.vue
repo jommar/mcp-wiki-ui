@@ -19,11 +19,15 @@ const blocks = ref([]);
 watch(() => props.content, parse, { immediate: true });
 
 function parse(raw) {
-  if (!raw) { blocks.value = []; return; }
+  if (!raw) {
+    blocks.value = [];
+    return;
+  }
   // Extract mermaid blocks
   const parts = [];
   const re = /```mermaid\n([\s\S]*?)```/g;
-  let last = 0, m;
+  let last = 0,
+    m;
   while ((m = re.exec(raw)) !== null) {
     if (m.index > last) parts.push({ type: 'html', html: marked.parse(raw.slice(last, m.index)) });
     parts.push({ type: 'mermaid', code: m[1].trim() });

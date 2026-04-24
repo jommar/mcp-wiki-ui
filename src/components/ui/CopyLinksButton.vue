@@ -25,10 +25,14 @@ async function copy() {
       .join('\n\n---\n\n');
     await navigator.clipboard.writeText(text);
     state.value = 'copied';
-    setTimeout(() => { state.value = 'idle'; }, 2000);
+    setTimeout(() => {
+      state.value = 'idle';
+    }, 2000);
   } catch {
     state.value = 'error';
-    setTimeout(() => { state.value = 'idle'; }, 2000);
+    setTimeout(() => {
+      state.value = 'idle';
+    }, 2000);
   }
 }
 
@@ -36,7 +40,14 @@ const label = () => {
   if (state.value === 'loading') return 'Copying…';
   if (state.value === 'copied') return 'Copied!';
   if (state.value === 'error') return 'Error';
-  return props.label || (props.incoming && props.outgoing ? 'Copy Links' : props.incoming ? 'Copy Backlinks' : 'Copy Outlinks');
+  return (
+    props.label ||
+    (props.incoming && props.outgoing
+      ? 'Copy Links'
+      : props.incoming
+        ? 'Copy Backlinks'
+        : 'Copy Outlinks')
+  );
 };
 
 const icon = () => {
@@ -50,9 +61,11 @@ const icon = () => {
   <button
     :class="[
       'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[12px] font-medium transition-all duration-150',
-      state === 'copied' ? 'border-success/40 bg-success/10 text-success' :
-      state === 'error' ? 'border-danger/40 bg-danger/10 text-danger' :
-      'border-border bg-bg text-muted hover:border-accent/30 hover:text-accent hover:bg-accent/5',
+      state === 'copied'
+        ? 'border-success/40 bg-success/10 text-success'
+        : state === 'error'
+          ? 'border-danger/40 bg-danger/10 text-danger'
+          : 'border-border bg-bg text-muted hover:border-accent/30 hover:text-accent hover:bg-accent/5',
     ]"
     :disabled="state === 'loading'"
     @click="copy"

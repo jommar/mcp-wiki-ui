@@ -27,7 +27,11 @@ function handleClick() {
     ]"
     @click="handleClick"
   >
-    <Star class="w-3.5 h-3.5" :class="pinned ? 'text-warning' : ''" :fill="pinned ? 'currentColor' : 'none'" />
+    <Star
+      class="w-3.5 h-3.5"
+      :class="pinned ? 'text-warning' : ''"
+      :fill="pinned ? 'currentColor' : 'none'"
+    />
     {{ pinned ? 'Pinned' : 'Pin' }}
   </button>
 </template>

@@ -32,7 +32,9 @@ async function copySection(section) {
   await navigator.clipboard.writeText(text);
   copiedKey.value = section.key;
   if (copiedTimeout) clearTimeout(copiedTimeout);
-  copiedTimeout = setTimeout(() => { copiedKey.value = null; }, 2000);
+  copiedTimeout = setTimeout(() => {
+    copiedKey.value = null;
+  }, 2000);
 }
 
 marked.setOptions({ gfm: true, breaks: true });
@@ -55,8 +57,14 @@ async function openModal() {
     } else {
       // Fetch incoming/outgoing connections
       const [inData, outData] = await Promise.all([
-        wikiApi.getLinksContent(props.sectionKey, props.wikiId, { incoming: true, outgoing: false }),
-        wikiApi.getLinksContent(props.sectionKey, props.wikiId, { incoming: false, outgoing: true }),
+        wikiApi.getLinksContent(props.sectionKey, props.wikiId, {
+          incoming: true,
+          outgoing: false,
+        }),
+        wikiApi.getLinksContent(props.sectionKey, props.wikiId, {
+          incoming: false,
+          outgoing: true,
+        }),
       ]);
       const map = new Map();
       for (const s of inData.sections || []) map.set(s.key, { ...s, direction: 'incoming' });
@@ -131,11 +139,21 @@ function onOverlayKeydown(e) {
         <template v-else>
           <div class="modal-body">
             <div v-if="!sections.length" class="empty-state">
-              <Frown :width="28" :height="28" fill="none" stroke="currentColor" :stroke-width="1.5" />
+              <Frown
+                :width="28"
+                :height="28"
+                fill="none"
+                stroke="currentColor"
+                :stroke-width="1.5"
+              />
               <p>No connections</p>
             </div>
 
-            <div v-for="section in sections" :key="section.key + section.direction" class="section-card">
+            <div
+              v-for="section in sections"
+              :key="section.key + section.direction"
+              class="section-card"
+            >
               <div class="section-card-header">
                 <div class="section-card-meta">
                   <span class="section-card-title">{{ section.title }}</span>
@@ -143,27 +161,67 @@ function onOverlayKeydown(e) {
                 </div>
                 <div class="section-card-actions">
                   <button class="copy-section-btn" @click="copySection(section)">
-                    <Check v-if="copiedKey === section.key" :width="13" :height="13" fill="none" stroke="currentColor" :stroke-width="2.5" />
-                    <Copy v-else :width="13" :height="13" fill="none" stroke="currentColor" :stroke-width="2" />
+                    <Check
+                      v-if="copiedKey === section.key"
+                      :width="13"
+                      :height="13"
+                      fill="none"
+                      stroke="currentColor"
+                      :stroke-width="2.5"
+                    />
+                    <Copy
+                      v-else
+                      :width="13"
+                      :height="13"
+                      fill="none"
+                      stroke="currentColor"
+                      :stroke-width="2"
+                    />
                   </button>
                   <span v-if="section.direction" :class="['direction-badge', section.direction]">
                     <template v-if="section.direction === 'both'">
-                      <ArrowUp :width="11" :height="11" fill="none" stroke="currentColor" :stroke-width="2.5" />
-                      <ArrowDown :width="11" :height="11" fill="none" stroke="currentColor" :stroke-width="2.5" />
+                      <ArrowUp
+                        :width="11"
+                        :height="11"
+                        fill="none"
+                        stroke="currentColor"
+                        :stroke-width="2.5"
+                      />
+                      <ArrowDown
+                        :width="11"
+                        :height="11"
+                        fill="none"
+                        stroke="currentColor"
+                        :stroke-width="2.5"
+                      />
                     </template>
                     <ArrowUp
                       v-else-if="section.direction === 'incoming'"
-                      :width="11" :height="11" fill="none" stroke="currentColor" :stroke-width="2.5"
+                      :width="11"
+                      :height="11"
+                      fill="none"
+                      stroke="currentColor"
+                      :stroke-width="2.5"
                     />
                     <ArrowDown
                       v-else
-                      :width="11" :height="11" fill="none" stroke="currentColor" :stroke-width="2.5"
+                      :width="11"
+                      :height="11"
+                      fill="none"
+                      stroke="currentColor"
+                      :stroke-width="2.5"
                     />
                     {{ section.direction }}
                   </span>
                   <button class="open-btn" @click="navigateTo(section.key)">
                     Open
-                    <ChevronRight :width="13" :height="13" fill="none" stroke="currentColor" :stroke-width="2" />
+                    <ChevronRight
+                      :width="13"
+                      :height="13"
+                      fill="none"
+                      stroke="currentColor"
+                      :stroke-width="2"
+                    />
                   </button>
                 </div>
               </div>

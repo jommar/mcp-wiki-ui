@@ -18,13 +18,16 @@ export const api = {
   sections: (wikiId, limit) => get('/wiki/sections', { wikiId, limit }),
   browse: (topic, wikiId, limit) => get('/wiki/browse', { topic, wikiId, limit }),
   search: (query, wikiId, limit) => get('/wiki/search', { query, wikiId, limit }),
-  section: (key, wikiId, offset, limit) => get(`/wiki/section/${encodeURIComponent(key)}`, { wikiId, offset, limit }),
+  section: (key, wikiId, offset, limit) =>
+    get(`/wiki/section/${encodeURIComponent(key)}`, { wikiId, offset, limit }),
   sectionsBatch: (keys, wikiId) => get('/wiki/sections/batch', { keys: keys.join(','), wikiId }),
   backlinks: (key, wikiId) => get(`/wiki/backlinks/${encodeURIComponent(key)}`, { wikiId }),
   connections: (key, wikiId) => get(`/wiki/connections/${encodeURIComponent(key)}`, { wikiId }),
-  linksContent: (key, wikiId, opts = {}) => get(`/wiki/links-content/${encodeURIComponent(key)}`, { wikiId, ...opts }),
+  linksContent: (key, wikiId, opts = {}) =>
+    get(`/wiki/links-content/${encodeURIComponent(key)}`, { wikiId, ...opts }),
   validate: (wikiId) => get('/wiki/validate', { wikiId }),
-  history: (key, wikiId, limit) => get(`/wiki/history/${encodeURIComponent(key)}`, { wikiId, limit }),
+  history: (key, wikiId, limit) =>
+    get(`/wiki/history/${encodeURIComponent(key)}`, { wikiId, limit }),
   graph: (wikiId) => get('/wiki/graph', { wikiId }),
   stats: (wikiId) => get('/wiki/stats', { wikiId }),
 };
