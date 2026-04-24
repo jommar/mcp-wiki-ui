@@ -2,6 +2,13 @@ import js from '@eslint/js';
 import globals from 'globals';
 import pluginVue from 'eslint-plugin-vue';
 import scopedCss from 'eslint-plugin-vue-scoped-css';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+let autoImportGlobals = {};
+try {
+  autoImportGlobals = require('./.eslintrc-auto-import.json').globals;
+} catch {}
 
 export default [
   // Global ignores
@@ -20,6 +27,7 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.node,
+        ...autoImportGlobals,
       },
     },
 
