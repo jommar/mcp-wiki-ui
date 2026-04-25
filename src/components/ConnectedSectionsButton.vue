@@ -1,7 +1,7 @@
 <script setup>
-import { wikiApi } from '../api/wiki.js';
+import { api } from '@/api/wiki.js';
 import { marked } from 'marked';
-import CopyLinksButton from './CopyLinksButton.vue';
+import CopyLinksButton from '@/components/ui/CopyLinksButton.vue';
 import { Sun, X, Frown, Check, Copy, ArrowUp, ArrowDown, ChevronRight } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -52,16 +52,16 @@ async function openModal() {
   try {
     if (props.keys && props.keys.length > 0) {
       // Fetch sections directly by key
-      const data = await wikiApi.getSectionsBatch(props.keys, props.wikiId);
+      const data = await api.sectionsBatch(props.keys, props.wikiId);
       sections.value = (data.sections || []).map((s) => ({ ...s, direction: null }));
     } else {
       // Fetch incoming/outgoing connections
       const [inData, outData] = await Promise.all([
-        wikiApi.getLinksContent(props.sectionKey, props.wikiId, {
+        api.linksContent(props.sectionKey, props.wikiId, {
           incoming: true,
           outgoing: false,
         }),
-        wikiApi.getLinksContent(props.sectionKey, props.wikiId, {
+        api.linksContent(props.sectionKey, props.wikiId, {
           incoming: false,
           outgoing: true,
         }),

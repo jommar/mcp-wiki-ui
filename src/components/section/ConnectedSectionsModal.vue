@@ -1,20 +1,12 @@
 <script setup>
 import { api } from '@/api/wiki.js';
 import SectionContent from './SectionContent.vue';
-import {
-  Check,
-  Copy,
-  X,
-  Frown,
-  ArrowLeft,
-  ArrowRight,
-  ArrowUpDown,
-  ChevronRight,
-} from 'lucide-vue-next';
+import { Check, Copy, X, Frown, ChevronRight } from 'lucide-vue-next';
 
 const props = defineProps({
   sectionKey: { type: String, required: true },
   wikiId: String,
+  relatedKeys: { type: Array, default: null },
 });
 
 const router = useRouter();
@@ -35,22 +27,34 @@ async function load() {
   loading.value = true;
   sections.value = [];
   try {
-    const [inData, outData] = await Promise.all([
-      api.linksContent(props.sectionKey, props.wikiId, { incoming: true, outgoing: false }),
-      api.linksContent(props.sectionKey, props.wikiId, { incoming: false, outgoing: true }),
-    ]);
-    // Build direction map, exclude the current section (it appears in both results as the anchor)
-    const map = new Map();
-    for (const s of inData.sections || []) {
-      if (s.key === props.sectionKey) continue;
-      map.set(s.key, { ...s, direction: 'incoming' });
+    if (props.relatedKeys && props.relatedKeys.length > 0) {
+      const keys = [...new Set([props.sectionKey, ...props.relatedKeys])];
+      const data = await api.sectionsBatch(keys, props.wikiId);
+      const all = data.sections || [];
+      // Sort: current section first
+      all.sort((a, b) => {
+        if (a.key === props.sectionKey) return -1;
+        if (b.key === props.sectionKey) return 1;
+        return 0;
+      });
+      sections.value = all;
+    } else {
+      const [inData, outData] = await Promise.all([
+        api.linksContent(props.sectionKey, props.wikiId, { incoming: true, outgoing: false }),
+        api.linksContent(props.sectionKey, props.wikiId, { incoming: false, outgoing: true }),
+      ]);
+      const map = new Map();
+      for (const s of inData.sections || []) {
+        if (s.key === props.sectionKey) continue;
+        map.set(s.key, { ...s, direction: 'incoming' });
+      }
+      for (const s of outData.sections || []) {
+        if (s.key === props.sectionKey) continue;
+        if (map.has(s.key)) map.get(s.key).direction = 'both';
+        else map.set(s.key, { ...s, direction: 'outgoing' });
+      }
+      sections.value = [...map.values()];
     }
-    for (const s of outData.sections || []) {
-      if (s.key === props.sectionKey) continue;
-      if (map.has(s.key)) map.get(s.key).direction = 'both';
-      else map.set(s.key, { ...s, direction: 'outgoing' });
-    }
-    sections.value = [...map.values()];
   } finally {
     loading.value = false;
   }
@@ -125,7 +129,7 @@ defineExpose({ open });
             class="flex items-center justify-between px-5 py-3.5 border-b border-border flex-shrink-0"
           >
             <div class="flex items-center gap-3">
-              <h3 class="text-[15px] font-bold text-heading">Connected Sections</h3>
+              <h3 class="text-[15px] font-bold text-heading">Related Sections</h3>
               <span
                 v-if="!loading"
                 class="text-[12px] text-muted font-mono bg-elevated border border-border px-2 py-0.5 rounded-full"
@@ -167,7 +171,7 @@ defineExpose({ open });
               <div
                 class="w-8 h-8 rounded-full border-2 border-border border-t-accent animate-spin"
               />
-              <span class="text-[13px]">Loading connected sections…</span>
+              <span class="text-[13px]">Loading related sections…</span>
             </div>
 
             <!-- Empty -->
@@ -176,14 +180,19 @@ defineExpose({ open });
               class="flex flex-col items-center justify-center gap-3 py-16 text-muted"
             >
               <Frown class="w-10 h-10 opacity-30" />
-              <p class="text-[14px]">No connected sections</p>
+              <p class="text-[14px]">No related sections</p>
             </div>
 
             <!-- Section cards -->
             <div
               v-for="s in sections"
               :key="s.key"
-              class="rounded-xl border border-border overflow-hidden"
+              :class="[
+                'rounded-xl border overflow-hidden transition-colors',
+                s.key === props.sectionKey
+                  ? 'border-accent/30 bg-accent/5'
+                  : 'border-border',
+              ]"
             >
               <!-- Card header -->
               <div
@@ -196,31 +205,6 @@ defineExpose({ open });
                   <code class="text-[11px] text-accent font-mono">{{ s.key }}</code>
                 </div>
                 <div class="flex items-center gap-2 flex-shrink-0">
-                  <!-- Direction badge -->
-                  <span
-                    v-if="s.direction !== 'both'"
-                    :class="[
-                      'flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border',
-                      s.direction === 'incoming'
-                        ? 'text-[#94a3b8] border-[#cbd5e1]/30 bg-[#cbd5e1]/10'
-                        : 'text-[#d97706] border-[#fbbf24]/30 bg-[#fbbf24]/10',
-                    ]"
-                  >
-                    <ArrowLeft
-                      v-if="s.direction === 'incoming'"
-                      class="w-2.5 h-2.5"
-                      :stroke-width="2.5"
-                    />
-                    <ArrowRight v-else class="w-2.5 h-2.5" :stroke-width="2.5" />
-                    {{ s.direction }}
-                  </span>
-                  <span
-                    v-else
-                    class="flex items-center gap-0.5 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border border-border text-muted bg-elevated"
-                  >
-                    <ArrowUpDown class="w-2.5 h-2.5" :stroke-width="2.5" />
-                    both
-                  </span>
                   <!-- Copy section -->
                   <button
                     :class="[

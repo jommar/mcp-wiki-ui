@@ -3,9 +3,10 @@ import { api } from '@/api/wiki.js';
 import { Copy, Check, AlertCircle } from 'lucide-vue-next';
 
 const props = defineProps({
-  sectionKey: { type: String, required: true },
+  sectionKey: { type: String, default: '' },
   wikiId: String,
-  incoming: { type: Boolean, default: true },
+  keys: { type: Array, default: null },
+  incoming: { type: Boolean, default: false },
   outgoing: { type: Boolean, default: false },
   label: { type: String, default: '' },
 });
@@ -16,12 +17,30 @@ async function copy() {
   if (state.value === 'loading') return;
   state.value = 'loading';
   try {
-    const data = await api.linksContent(props.sectionKey, props.wikiId, {
-      incoming: props.incoming,
-      outgoing: props.outgoing,
-    });
-    const text = (data.sections || [])
-      .map((s) => `## ${s.title}\n\n${s.content}`)
+    let sections = [];
+    if (props.keys && props.keys.length > 0) {
+      const data = await api.sectionsBatch(props.keys, props.wikiId);
+      sections = data.sections || [];
+    } else if (props.sectionKey) {
+      if (!props.incoming && !props.outgoing) {
+        const data = await api.section(props.sectionKey, props.wikiId);
+        sections = [data];
+      } else {
+        const data = await api.linksContent(props.sectionKey, props.wikiId, {
+          incoming: props.incoming,
+          outgoing: props.outgoing,
+        });
+        sections = data.sections || [];
+      }
+    }
+    const seen = new Set();
+    const text = sections
+      .filter((s) => {
+        if (!s || seen.has(s.key)) return false;
+        seen.add(s.key);
+        return true;
+      })
+      .map((s) => (s.content?.startsWith('#') ? s.content : `## ${s.title}\n\n${s.content}`))
       .join('\n\n---\n\n');
     await navigator.clipboard.writeText(text);
     state.value = 'copied';
@@ -46,7 +65,9 @@ const label = () => {
       ? 'Copy Links'
       : props.incoming
         ? 'Copy Backlinks'
-        : 'Copy Outlinks')
+        : props.outgoing
+          ? 'Copy Outlinks'
+          : 'Copy')
   );
 };
 

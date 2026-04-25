@@ -125,16 +125,14 @@ function navigate(key) {
             <CopyLinksButton
               :section-key="section.key"
               :wiki-id="section.wikiId"
-              :incoming="true"
-              :outgoing="true"
             />
             <button
               class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-elevated text-[12px] text-muted hover:border-accent/30 hover:text-accent hover:bg-accent/5 transition-all duration-150"
-              title="View connected sections"
+              title="View related sections"
               @click="connectionsModal?.open()"
             >
               <Network class="w-3.5 h-3.5" />
-              Read Connected
+              Read Related
             </button>
           </div>
         </div>
@@ -226,6 +224,7 @@ function navigate(key) {
       ref="connectionsModal"
       :section-key="section.key"
       :wiki-id="section.wikiId || wikiId"
+      :related-keys="section.relatedSections?.map(r => r.key)"
     />
   </div>
 </template>
